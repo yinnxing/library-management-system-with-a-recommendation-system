@@ -19,7 +19,10 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(1012, "", HttpStatus.UNAUTHORIZED),
     BOOK_EXISTED(1009, "Book existed", HttpStatus.BAD_REQUEST),
     BOOK_NOT_FOUND(1010, "Book not found", HttpStatus.NOT_FOUND),
-    BOOK_NOT_AVAILABLE(1011, "book is not available", HttpStatus.BAD_REQUEST)
+    BOOK_NOT_AVAILABLE(1011, "book is not available", HttpStatus.BAD_REQUEST),
+    PAGE_NUMBER_INVALID(1012, "page number must be greater than 0", HttpStatus.BAD_REQUEST),
+    SIZE_INVALID(1013, "size must be greater than 0", HttpStatus.BAD_REQUEST)
+
 
     ;
     private int code;
