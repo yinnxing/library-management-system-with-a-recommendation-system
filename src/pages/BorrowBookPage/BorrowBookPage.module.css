@@ -1,0 +1,95 @@
+/* Container chính */
+.borrowPageContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tiêu đề */
+.title {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Thông tin sách */
+.bookInfo {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.bookImage {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.bookDetails {
+    flex: 1;
+}
+
+.bookDetails p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.bookDetails strong {
+    color: #333;
+}
+
+/* Nút mượn sách */
+.borrowButton {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+.borrowButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.borrowButton:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+/* Thông tin mượn thành công */
+.borrowSuccess {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #eaffea;
+    border: 1px solid #28a745;
+    border-radius: 5px;
+    color: #28a745;
+}
+
+.borrowSuccess p {
+    margin: 10px 0;
+    font-size: 1rem;
+}
+
+/* Ghi chú */
+.borrowNote {
+    font-size: 0.9rem;
+    color: #555;
+    font-style: italic;
+    margin-top: 10px;
+}

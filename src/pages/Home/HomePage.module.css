@@ -1,0 +1,53 @@
+
+.homePage {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .carouselSection, .recommendedSection, .searchResultsSection {
+    width: 100%;
+    max-width: 1400px;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .carouselSection h2,
+  .recommendedSection h2,
+  .searchResultsSection h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .carouselSection .bookList,
+  .recommendedSection .bookList,
+  .searchResultsSection .bookList {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  
+  h2 {
+    color: #1976d2;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+  
+  @media (max-width: 768px) {
+    .carouselSection, .recommendedSection, .searchResultsSection {
+      padding: 15px;
+    }
+  
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+  
