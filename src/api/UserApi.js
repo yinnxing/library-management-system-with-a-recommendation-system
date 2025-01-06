@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios, { Axios } from 'axios';
 import { jwtDecode } from 'jwt-decode'; 
 
-const API_BASE_URL = 'http://localhost:8080/api'; // Đường dẫn API của backend
+const API_BASE_URL = 'http://localhost:8080/api'; 
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
@@ -27,7 +27,6 @@ export const refreshToken = async () => {
 
 axiosInstance.interceptors.request.use(
     async (config) => {
-        // Nếu endpoint là /auth/refresh, bỏ qua interceptor
         if (config.url.includes('/auth/refresh')) {
             return config;
         }
@@ -38,8 +37,7 @@ axiosInstance.interceptors.request.use(
         if (token) {
             try {
                 const decodedToken = jwtDecode(token);
-
-\                const isTokenExpired = decodedToken.exp * 1000 < Date.now();
+              const isTokenExpired = decodedToken.exp * 1000 < Date.now();
 
                 if (isTokenExpired) {
                     const newAccessToken = await refreshToken();
@@ -97,7 +95,28 @@ const UserApi = {
 },
    getRecommendedBooks(userId){
     return axiosInstance.get(`/recommend?userId=${userId}`);
-}
+},
+   getPendingTransactions(userId) {
+    return axiosInstance.post('transactions/search', { userId, status: 'PENDING' });
+  },
+   
+  getReturnTransactions(userId) {
+    return axiosInstance.post('transactions/search', { userId, status: 'RETURNED' });
+  },
+
+ getFavoriteBooks(userId) {
+  return axiosInstance.get(`/books/wishlist?userId=${userId}`);
+},
+
+  addToFavorite(userId, bookId) {
+    return axiosInstance.post('/books/wishlist', { userId, bookId });
+  },
+
+  removeFromFavorite(userId, bookId) {
+    return axiosInstance.delete('/books/wishlist', {
+      data: { userId, bookId }
+    });
+  }
 
 };
 

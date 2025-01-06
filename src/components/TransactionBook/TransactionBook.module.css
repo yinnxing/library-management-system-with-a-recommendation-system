@@ -1,0 +1,91 @@
+/* TransactionBook.module.css */
+
+.transactionBookItem {
+  display: flex;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.transactionBookItem:hover {
+  background-color: #eaeaea;
+}
+
+.bookCover {
+  width: 120px;
+  height: 180px;
+  object-fit: cover;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+.bookDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bookTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 10px;
+  color: #333;
+}
+
+.bookAuthor {
+  font-size: 16px;
+  margin: 0 0 5px;
+  color: #555;
+}
+
+.bookGenre {
+  font-size: 14px;
+  margin: 0 0 10px;
+  color: #777;
+}
+
+.previewLink {
+  font-size: 14px;
+  color: #007bff;
+  text-decoration: none;
+  margin-top: 10px;
+  transition: color 0.3s ease;
+}
+
+.previewLink:hover {
+  color: #0056b3;
+}
+
+.transactionDetails {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.transactionDetails p {
+  margin: 5px 0;
+}
+
+.transactionDetails strong {
+  color: #333;
+}
+
+.transactionDetails .status {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.transactionDetails .status.pending {
+  color: #ff9800; /* Orange for pending */
+}
+
+.transactionDetails .status.completed {
+  color: #4caf50; /* Green for completed */
+}
+
+.transactionDetails .status.overdue {
+  color: #f44336; /* Red for overdue */
+}

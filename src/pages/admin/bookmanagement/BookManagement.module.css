@@ -1,0 +1,83 @@
+.bookManagementContainer {
+  padding: 20px;
+  background-color: #f4f4f9;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.addButton {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.addButton:hover {
+  background-color: #45a049;
+}
+
+.bookTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.bookTable th, .bookTable td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.bookTable th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.bookTable td {
+  background-color: white;
+}
+
+.bookTable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.bookTable td button {
+  margin-right: 10px;
+}
+
+.editButton, .deleteButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.editButton {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.deleteButton {
+  background-color: #f44336;
+  color: white;
+}
+
+.editButton:hover {
+  background-color: #45a049;
+}
+
+.deleteButton:hover {
+  background-color: #e53935;
+}
+
+p {
+  font-size: 16px;
+}

@@ -1,0 +1,58 @@
+.bookItem {
+  display: flex;
+  align-items: flex-start;
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 90%;
+}
+
+.bookCover {
+  width: 120px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.bookDetails {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-width: calc(100% - 140px); /* Trừ đi chiều rộng của ảnh và khoảng cách */
+}
+
+.bookTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 10px;
+}
+
+.bookAuthor,
+.bookGenre,
+.bookDescription {
+  margin: 5px 0;
+  color: #555;
+}
+
+.bookDescription {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #666;
+}
+
+.previewLink {
+  margin-top: 10px;
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.previewLink:hover {
+  color: #0056b3;
+}

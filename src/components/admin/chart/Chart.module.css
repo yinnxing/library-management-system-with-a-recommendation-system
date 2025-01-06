@@ -1,0 +1,17 @@
+.chartContainer {
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.chartTitle {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+canvas {
+  max-width: 100%;
+}

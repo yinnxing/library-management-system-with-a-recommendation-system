@@ -1,4 +1,4 @@
-const books = [
+const all_books = [
     {
             "bookId": 1,
             "title": "The New Testament, in an Improved Version",
@@ -1695,4 +1695,4 @@ const books = [
             "previewLink": null
         }
 ]
-export default books;
+export default all_books;

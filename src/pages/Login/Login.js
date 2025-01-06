@@ -5,6 +5,7 @@ import UserApi from '../../api/UserApi';
 import Cookies from 'js-cookie';
 import { useUser } from '../../contexts/UserContext'; 
 import { jwtDecode } from 'jwt-decode'; 
+import { useEffect } from 'react';
 
 const Login = () => {
     const { login } = useUser();
@@ -13,7 +14,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate(); 
 
-       const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!email || !password) {
@@ -27,34 +28,36 @@ const Login = () => {
             console.log(data);
 
             if (data.authenticated) {
-                // Lưu Access Token vào localStorage
                 localStorage.setItem('accessToken', data.accessToken);
-
-                // Lưu Refresh Token vào cookie (sử dụng js-cookie để lưu refresh token)
-                Cookies.set('refreshToken', data.refreshToken);
-
-                // Giải mã JWT token để lấy thông tin người dùng
+                Cookies.set('refreshToken', data.refreshToken, {
+                    secure: false,
+                });
                 const decodedToken = jwtDecode(data.accessToken);
                 console.log("DECODED:", decodedToken)
                 const userData = {
                     userId: decodedToken.userId,
                     email: decodedToken.sub, 
+                    role: decodedToken.role
                 };
 
                 login(userData, data.accessToken);
 
-                navigate('/');
+                const isAdmin = decodedToken.role === 'ADMIN';
+                if (isAdmin) {
+                    navigate('/admin');  
+                } else {
+                    navigate('/'); 
+                }
+
             } else {
-                // Nếu đăng nhập không thành công, hiển thị thông báo lỗi
                 setError(data.message || 'Invalid login credentials.');
             }
         } catch (error) {
-            // Nếu có lỗi khi kết nối với API, hiển thị thông báo lỗi
             setError('Error connecting to the server. Please try again later.');
         }
     };
 
-
+   
     return (
         <div className={styles.loginContainer}> 
             <h2>Login</h2>

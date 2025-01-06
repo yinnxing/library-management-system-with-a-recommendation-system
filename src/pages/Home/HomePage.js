@@ -36,26 +36,25 @@ const HomePage = () => {
       console.error("Lỗi khi lấy danh sách sách:", error);
     }
   };
-  const fetchRecommendBooks = async () => {
-    try {
-      console.log(user.userId);
-      const response = await UserApi.getRecommendedBooks("14d41a95-6161-4871-bfdf-6e29133283ea");
-      const titleBooks = response.data.recommended_books;
-      const recommendedBooks = all_books.filter((b) => titleBooks.includes(b.title));
-
-      setRecommendedBooks(recommendedBooks);
+  // const fetchRecommendBooks = async () => {
+  //   try {
+  //     console.log(user.userId);
+  //     const response = await UserApi.getRecommendedBooks("14d41a95-6161-4871-bfdf-6e29133283ea");
+  //     const titleBooks = response.data.recommended_books;
+  //     const recommendedBooks = all_books.filter((b) => titleBooks.includes(b.title));
+  //     setRecommendedBooks(recommendedBooks);
       
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách sách:", error);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Lỗi khi lấy danh sách sách:", error);
+  //   }
+  // };
   
 
   return (
     <div className={styles.homePage}>
       <section className={styles.carouselSection}>
         <h2>Sách Phổ Biến</h2>
-        <BookList books={popularBooks} />
+        <BookList books={popularBooks} userId={user.userId} />
       </section>
 
       {/* <section className={styles.recommendedSection}>

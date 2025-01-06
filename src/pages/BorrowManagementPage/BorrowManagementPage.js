@@ -1,79 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import styles from './BorrowManagementPage.module.css';
 import BookIcon from '@mui/icons-material/Book';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import UserApi from '../../api/UserApi';
+import { useUser } from '../../contexts/UserContext'; 
+import Book from '../../components/TransactionBook/TransactionBook'; 
 
 const BorrowManagementPage = () => {
   const [selectedTab, setSelectedTab] = useState('processing');
-  const [books, setBooks] = useState([
-    {
-      id: 1,
-      title: 'Sách A',
-      author: 'Tác giả 1',
-      requestDate: '2024-11-01',
-      dueDate: '2024-11-15',
-      returnDate: '2024-11-20',
-    },
-    {
-      id: 2,
-      title: 'Sách B',
-      author: 'Tác giả 2',
-      requestDate: '2024-10-25',
-      dueDate: '2024-11-10',
-      returnDate: '2024-11-12',
-    },
-  ]); 
+  const { user } = useUser();
+  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Hàm gọi API tương ứng theo trạng thái
+  const fetchBooksByTab = async () => {
+    setLoading(true);
+    try {
+      let response;
+      if (selectedTab === 'processing') {
+        response = await UserApi.getPendingTransactions(user.userId); // Sách đang xử lý
+      } else if (selectedTab === 'borrowing') {
+        response = await UserApi.getBorrowedBooks(user.userId); // Lấy sách đã mượn (thay đổi API)
+      } else if (selectedTab === 'returned') {
+        response = await UserApi.getReturnTransactions(user.userId); // Sách đã trả
+      }
+
+      // Chỉnh sửa dữ liệu để truyền vào TransactionBook
+      const fetchedBooks = response.data.map((transaction) => ({
+        transactionId: transaction.transactionId,
+        book: transaction.book,
+        borrowDate: transaction.borrowDate,
+        dueDate: transaction.dueDate,
+        returnDate: transaction.returnDate,
+        status: transaction.status,
+      }));
+      setBooks(fetchedBooks);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Gọi API khi thay đổi tab
+  useEffect(() => {
+    fetchBooksByTab();
+  }, [selectedTab, user.userId]);
 
   return (
     <div className={styles.borrowManagementPage}>
+      {/* Tabs */}
       <div className={styles.tabs}>
-        <button
-          className={`${styles.tabButton} ${
-            selectedTab === 'processing' ? styles.activeTab : ''
-          }`}
-          onClick={() => setSelectedTab('processing')}
-        >
-          <HourglassEmptyIcon className={styles.icon} />
-          Sách đang xử lý
-        </button>
-        <button
-          className={`${styles.tabButton} ${
-            selectedTab === 'borrowing' ? styles.activeTab : ''
-          }`}
-          onClick={() => setSelectedTab('borrowing')}
-        >
-          <BookIcon className={styles.icon} />
-          Sách đang mượn
-        </button>
-        <button
-          className={`${styles.tabButton} ${
-            selectedTab === 'returned' ? styles.activeTab : ''
-          }`}
-          onClick={() => setSelectedTab('returned')}
-        >
-          <CheckCircleIcon className={styles.icon} />
-          Sách đã trả
-        </button>
+        {[
+          { label: 'Sách đang xử lý', value: 'processing', Icon: HourglassEmptyIcon },
+          { label: 'Sách đã mượn', value: 'borrowing', Icon: BookIcon },
+          { label: 'Sách đã trả', value: 'returned', Icon: CheckCircleIcon },
+        ].map(({ label, value, Icon }) => (
+          <button
+            key={value}
+            className={`${styles.tabButton} ${selectedTab === value ? styles.activeTab : ''}`}
+            onClick={() => setSelectedTab(value)}
+          >
+            <Icon className={styles.icon} />
+            {label}
+          </button>
+        ))}
       </div>
+
+      {/* Nội dung */}
       <div className={styles.tabContent}>
         {loading ? (
           <p className={styles.loading}>Đang tải dữ liệu...</p>
         ) : books.length > 0 ? (
           <ul className={styles.bookList}>
-            {books.map((book) => (
-              <li key={book.id} className={styles.bookItem}>
-                <span className={styles.bookTitle}>{book.title}</span> - {book.author} <br />
-                {selectedTab === 'processing' && (
-                  <span className={styles.bookDetails}>Ngày yêu cầu: {book.requestDate}</span>
-                )}
-                {selectedTab === 'borrowing' && (
-                  <span className={styles.bookDetails}>Hạn trả: {book.dueDate}</span>
-                )}
-                {selectedTab === 'returned' && (
-                  <span className={styles.bookDetails}>Ngày trả: {book.returnDate}</span>
-                )}
+            {books.map((transaction) => (
+              <li key={transaction.transactionId} className={styles.bookItem}>
+                <Book transaction={transaction} /> 
               </li>
             ))}
           </ul>
