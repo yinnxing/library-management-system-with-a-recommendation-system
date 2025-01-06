@@ -1,13 +1,11 @@
 package com.library.booksystem.controller;
 
-import com.library.booksystem.dto.request.BookRequest;
 import com.library.booksystem.dto.request.BorrowRequest;
 import com.library.booksystem.dto.request.WishlistRequest;
 import com.library.booksystem.dto.response.ApiResponse;
 import com.library.booksystem.dto.response.BookResponse;
-import com.library.booksystem.dto.response.TransactionResponse;
+import com.library.booksystem.dto.response.BorrowResponse;
 import com.library.booksystem.dto.response.WishlistResponse;
-import com.library.booksystem.model.Transaction;
 import com.library.booksystem.model.specification.criteria.BookCriteria;
 import com.library.booksystem.model.specification.criteria.PaginationCriteria;
 import com.library.booksystem.service.BookService;
@@ -42,16 +40,16 @@ public class BookController {
                 .result(bookService.getBook(bookId))
                 .build();
     }
-    @PostMapping
-    ApiResponse<BookResponse> createBook(@RequestBody BookRequest request){
-        return ApiResponse.<BookResponse>builder()
-                .result(bookService.createBook(request))
-                .build();
-    }
+//    @PostMapping
+//    ApiResponse<BookResponse> createBook(@RequestBody BookRequest request){
+//        return ApiResponse.<BookResponse>builder()
+//                .result(bookService.createBook(request))
+//                .build();
+//    }
 
     @PostMapping("/borrow")
-    ApiResponse<TransactionResponse> borrowBook(@RequestBody BorrowRequest request){
-        return ApiResponse.<TransactionResponse>builder()
+    ApiResponse<BorrowResponse> borrowBook(@RequestBody BorrowRequest request){
+        return ApiResponse.<BorrowResponse>builder()
                 .result(transactionService.borrowBook(request))
                 .build();
     }

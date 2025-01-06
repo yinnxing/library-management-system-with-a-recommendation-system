@@ -52,6 +52,7 @@ public class AuthenticationController {
            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
+
         TokenResponse tokenResponse = authenticationService.refreshToken(refreshToken);
         return ApiResponse.<TokenResponse>builder()
                 .result(tokenResponse)

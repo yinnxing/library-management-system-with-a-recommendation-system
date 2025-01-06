@@ -1,24 +1,34 @@
 package com.library.booksystem.service;
 
 import com.library.booksystem.dto.request.BorrowRequest;
+import com.library.booksystem.dto.request.TransactionRequest;
+import com.library.booksystem.dto.response.BorrowResponse;
 import com.library.booksystem.dto.response.TransactionResponse;
 import com.library.booksystem.enums.TransactionStatus;
 import com.library.booksystem.exception.AppException;
 import com.library.booksystem.exception.ErrorCode;
+import com.library.booksystem.mapper.TransactionMapper;
 import com.library.booksystem.model.Book;
 import com.library.booksystem.model.Transaction;
 import com.library.booksystem.model.User;
+import com.library.booksystem.model.specification.TransactionFilterSpecification;
+import com.library.booksystem.model.specification.criteria.PaginationCriteria;
+import com.library.booksystem.model.specification.criteria.TransactionCriteria;
 import com.library.booksystem.repository.BookRepository;
 import com.library.booksystem.repository.TransactionRepository;
 import com.library.booksystem.repository.UserRepository;
+import com.library.booksystem.util.PageRequestBuilder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.coyote.BadRequestException;
+import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +37,9 @@ public class TransactionService {
     TransactionRepository transactionRepository;
     UserRepository userRepository;
     BookRepository bookRepository;
-    public TransactionResponse borrowBook(BorrowRequest request) {
+    private final TransactionMapper transactionMapper;
+
+    public BorrowResponse borrowBook(BorrowRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
 
@@ -38,49 +50,43 @@ public class TransactionService {
             throw new AppException(ErrorCode.BOOK_NOT_AVAILABLE);
         }
 
-        // Cập nhật số lượng sách có sẵn
         book.setAvailableQuantity(book.getAvailableQuantity() - 1);
         bookRepository.save(book);
 
-        // Tạo giao dịch mượn sách
         Transaction transaction = new Transaction();
         transaction.setUser(user);
         transaction.setBook(book);
         transaction.setBorrowDate(LocalDateTime.now());
-        transaction.setDueDate(LocalDateTime.now().plusDays(7));  // 7 ngày sau
-        transaction.setStatus(TransactionStatus.PENDING);  // Trạng thái ban đầu là 'PENDING'
+        transaction.setDueDate(LocalDateTime.now().plusDays(7));
+        transaction.setStatus(TransactionStatus.PENDING);
         transactionRepository.save(transaction);
-        return TransactionResponse.builder()
+        return BorrowResponse.builder()
                 .userId(transaction.getUser().getUserId())
                 .bookId(transaction.getBook().getBookId())
                 .transactionId(transaction.getTransactionId())
-                .expiryDate(transaction.getDueDate().toLocalDate().toString()) // Ngày hết hạn
+                .expiryDate(transaction.getDueDate().toLocalDate().toString())
                 .status(transaction.getStatus().name())
                 .build();
     }
-    // Xử lý khi người dùng không mượn sách trong vòng 7 ngày
-    @Scheduled(cron = "0 0 0 * * ?")  // Chạy mỗi ngày vào lúc nửa đêm
-    public void cancelPendingTransactions() {
-        LocalDateTime currentDate = LocalDateTime.now();
+//    @Scheduled(cron = "0 0 0 * * ?")
+//    public void cancelPendingTransactions() {
+//        LocalDateTime currentDate = LocalDateTime.now();
+//
+//        List<Transaction> pendingTransactions = transactionRepository.findByStatus("PENDING");
+//
+//        for (Transaction transaction : pendingTransactions) {
+//            if (transaction.getDueDate().isBefore(currentDate)) {
+//                transaction.setStatus(TransactionStatus.CANCELLED);
+//
+//                Book book = transaction.getBook();
+//                book.setAvailableQuantity(book.getAvailableQuantity() + 1);
+//                bookRepository.save(book);
+//
+//                transactionRepository.save(transaction);
+//            }
+//        }
+//    }
 
-        List<Transaction> pendingTransactions = transactionRepository.findByStatus("PENDING");
-
-        for (Transaction transaction : pendingTransactions) {
-            if (transaction.getDueDate().isBefore(currentDate)) {
-                // Hủy giao dịch quá hạn
-                transaction.setStatus(TransactionStatus.CANCELLED);
-
-                // Khôi phục lại số lượng sách có sẵn
-                Book book = transaction.getBook();
-                book.setAvailableQuantity(book.getAvailableQuantity() + 1);
-                bookRepository.save(book);
-
-                transactionRepository.save(transaction);
-            }
-        }
-    }
-
-    // Xử lý khi người dùng thực hiện trả sách offline
     public Transaction returnBook(String transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
@@ -89,11 +95,9 @@ public class TransactionService {
             throw new RuntimeException("Cannot return book for this transaction");
         }
 
-        // Cập nhật trạng thái giao dịch thành 'RETURNED'
         transaction.setStatus(TransactionStatus.RETURNED);
         transaction.setReturnDate(LocalDateTime.now());
 
-        // Cập nhật số lượng sách có sẵn
         Book book = transaction.getBook();
         book.setAvailableQuantity(book.getAvailableQuantity() + 1);
         bookRepository.save(book);
@@ -101,4 +105,12 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
+    public Page<Transaction> getTransactions(TransactionCriteria transactionCriteria, PaginationCriteria paginationCriteria) throws BadRequestException {
+        Page<Transaction> transactions = transactionRepository.findAll(new TransactionFilterSpecification(transactionCriteria), PageRequestBuilder.build(paginationCriteria));
+        return transactions;
+    }
+    public List<TransactionResponse> getTransactions(TransactionRequest request) {
+        List<Transaction> transactions = transactionRepository.findByUser_UserIdAndStatus(request.getUserId(), request.getStatus());
+        return transactions.stream().map(transactionMapper::toTransactionResponse).collect(Collectors.toList());
+    }
 }

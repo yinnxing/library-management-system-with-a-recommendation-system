@@ -123,6 +123,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
             .expirationTime(new Date(new Date().getTime() + VALID_DURATION))
             .jwtID(UUID.randomUUID().toString())
             .claim("userId", user.getUserId())
+            .claim("role", user.getRole())
             .build();
         JWSObject jwsObject = new JWSObject(
                 new JWSHeader(JWSAlgorithm.HS512),
@@ -144,6 +145,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
             .expirationTime(new Date(new Date().getTime() + REFRESHABLE_DURATION))
             .jwtID(UUID.randomUUID().toString())
             .claim("userId", user.getUserId())
+            .claim("role", user.getRole())
             .build();
         JWSObject jwsObject = new JWSObject(
                 new JWSHeader(JWSAlgorithm.HS512),

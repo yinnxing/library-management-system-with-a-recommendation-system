@@ -1,19 +1,19 @@
 package com.library.booksystem.dto.response;
 
+import com.library.booksystem.model.Book;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.UUID;
-
+import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class TransactionResponse {
-    String userId;
-    Integer bookId;
-    String transactionId;
-    private String expiryDate;
+    private String transactionId;
+    private BookResponse book;
+    private LocalDateTime borrowDate;
+    private LocalDateTime dueDate;
+    private LocalDateTime returnDate;
     private String status;
 }
