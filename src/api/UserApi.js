@@ -72,7 +72,7 @@ axiosInstance.interceptors.response.use(
 
 const UserApi = {
     
-    getBooks(page = 1, size = 10) {
+    getBooks(page = 1, size = 20) {
     return axiosInstance.get('/books', {
         params: {
             page,
