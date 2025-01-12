@@ -19,9 +19,9 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -46,11 +46,29 @@ public class BookService {
 
     public BookResponse createBook(BookRequest request){
         Book book = bookMapper.toBook(request);
+        book.setCreatedAt(LocalDateTime.now());//
         bookRepository.save(book);
         return bookMapper.toBookResponse(book);
     }
+    public BookResponse updateBook(Integer bookId, BookRequest request) {
+        Book existingBook = bookRepository.findById(bookId).orElseThrow(
+                () -> new AppException(ErrorCode.BOOK_NOT_FOUND)
+        );
+        bookMapper.updateBook(existingBook, request);
+        bookRepository.save(existingBook);
+        return bookMapper.toBookResponse(existingBook);
+    }
+
+    public void deleteBook(Integer bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(
+                () -> new AppException(ErrorCode.BOOK_NOT_FOUND)
+        );
+        bookRepository.delete(book);
+    }
+
     public String getLastBorrowedBook(String userId) {
         return transactionRepository.findLastBorrowedBook(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sách mượn cuối cùng"));
     }
+
 }
