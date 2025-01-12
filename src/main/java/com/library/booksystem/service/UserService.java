@@ -47,7 +47,7 @@ public class UserService {
 
     }
     public List<UserResponse> getUsers(){
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findByRole(Role.USER.name());
         return users.stream().map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
