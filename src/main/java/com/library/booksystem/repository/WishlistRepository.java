@@ -13,4 +13,5 @@ import java.util.List;
 public interface WishlistRepository extends JpaRepository<Wishlist, Integer> {
     @Query("SELECT w.book FROM Wishlist w WHERE user.userId = :userId")
     List<Book> findWishlistByUserId(@Param("userId") String userId);
+    Wishlist findByUser_UserIdAndBook_BookId(String userId, Integer bookId);
 }

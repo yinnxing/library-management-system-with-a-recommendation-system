@@ -66,6 +66,15 @@ public class BookController {
                 .result(wishlistService.getWishlist(userId))
                 .build();
     }
+    @DeleteMapping("/wishlist")
+    ApiResponse<Void>removeFromWishlist(@RequestBody WishlistRequest request) {
+        wishlistService.removeFromWishlist(request.getUserId(), request.getBookId());
+        return ApiResponse.<Void>builder().build();
+}
+
+
+
+
 
     
 

@@ -54,6 +54,12 @@ public class WishlistService {
                 .collect(Collectors.toList());
 
    }
+    public void removeFromWishlist(String userId, Integer bookId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        Wishlist wishlist = wishlistRepository.findByUser_UserIdAndBook_BookId(userId, bookId);
+        wishlistRepository.delete(wishlist);
+    }
 
 
 }
