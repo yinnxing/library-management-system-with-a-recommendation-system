@@ -1,0 +1,131 @@
+/* TransactionManagement.module.css */
+
+/* Container chính cho phần quản lý giao dịch */
+.transactionManagement {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Tiêu đề của trang */
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #495057;
+}
+
+/* Phần thanh lọc trạng thái */
+.statusFilter {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.statusFilter button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.statusFilter button:hover {
+  background-color: #f1f3f5;
+  transform: scale(1.05);
+}
+
+.statusFilter button.activeFilter {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #0056b3;
+}
+
+/* Bảng hiển thị các giao dịch */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table th {
+  background-color: #007bff;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table td {
+  font-size: 1rem;
+  color: #495057;
+}
+
+/* Nút cập nhật trạng thái */
+.updateButton {
+  padding: 8px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.updateButton:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+.updateButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Hiệu ứng Loading */
+.loadingSpinner {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 1.2rem;
+  color: #495057;
+}
+
+/* Cấu hình responsive */
+@media (max-width: 768px) {
+  .transactionManagement {
+    padding: 15px;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .statusFilter {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .table th, .table td {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}

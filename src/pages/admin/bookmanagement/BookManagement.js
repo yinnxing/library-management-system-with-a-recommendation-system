@@ -1,46 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import styles from './BookManagement.module.css'; 
 import BookModal from './BookModal'; 
-import all_books from '../../../assets/books'
+import AdminApi from '../../../api/AdminApi';
+
 const BookManagement = () => {
-  const [books, setBooks] = useState(all_books);
+  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [currentBook, setCurrentBook] = useState(null);
 
   useEffect(() => {
-    fetch('/api/admin/books')
-      .then((response) => response.json())
-      .then((data) => {
-        setBooks(data);
+    fetchBooks();
+  }, []);
+
+  const fetchBooks = () => {
+    setLoading(true);
+    AdminApi.getBooks()
+      .then((response) => {
+        setBooks(response.data.result.content);
         setLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching books:', error);
         setLoading(false);
       });
-  }, []);
+  };
 
   const handleDelete = (bookId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this book?');
-    if (confirmDelete) {
-      fetch(`/api/admin/books/${bookId}`, {
-        method: 'DELETE',
-      })
+    if (window.confirm('Are you sure you want to delete this book?')) {
+      AdminApi.deleteBook(bookId)
         .then(() => {
-          setBooks(books.filter(book => book.bookId !== bookId));
+          setBooks((prevBooks) => prevBooks.filter((book) => book.bookId !== bookId));
+          alert('Book deleted successfully!');
         })
         .catch((error) => console.error('Error deleting book:', error));
     }
   };
 
   const handleEdit = (book) => {
-    setCurrentBook(book);
+    setCurrentBook(book); // Đặt sách hiện tại vào modal để chỉnh sửa
     setShowModal(true);
   };
 
   const handleAdd = () => {
-    setCurrentBook(null);
+    setCurrentBook(null); // Mở modal ở chế độ thêm mới
     setShowModal(true);
   };
 
@@ -49,33 +52,36 @@ const BookManagement = () => {
     setCurrentBook(null);
   };
 
-  const handleSave = (updatedBook) => {
-    if (updatedBook.bookId) {
-      fetch(`/api/admin/books/${updatedBook.bookId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBook),
+const handleSave = (updatedBook) => {
+  if (updatedBook.bookId) {
+    AdminApi.editBook(updatedBook.bookId, updatedBook)
+      .then((response) => {
+        setBooks((prevBooks) =>
+          prevBooks.map((book) =>
+            book.bookId === response.data.result.bookId ? response.data.result : book
+          )
+        );
+        handleModalClose();
+        alert('Book updated successfully!');
       })
-        .then((response) => response.json())
-        .then((data) => {
-          setBooks(books.map(book => (book.bookId === data.bookId ? data : book)));
-          handleModalClose();
-        })
-        .catch((error) => console.error('Error updating book:', error));
-    } else {
-      fetch('/api/admin/books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBook),
+      .catch((error) => {
+        console.error('Error updating book:', error);
+        alert('Failed to update book. Please try again.');
+      });
+  } else {
+    AdminApi.createBook(updatedBook)
+      .then((response) => {
+        setBooks((prevBooks) => [response.data.result, ...prevBooks]);
+        handleModalClose();
+        alert('Book added successfully!');
       })
-        .then((response) => response.json())
-        .then((data) => {
-          setBooks([...books, data]);
-          handleModalClose();
-        })
-        .catch((error) => console.error('Error adding book:', error));
-    }
-  };
+      .catch((error) => {
+        console.error('Error adding book:', error);
+        alert('Failed to add book. Please try again.');
+      });
+  }
+};
+
 
   return (
     <div className={styles.bookManagementContainer}>

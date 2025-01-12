@@ -1,0 +1,33 @@
+.userManagementContainer {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.userTable th, .userTable td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.userTable th {
+  background-color: #f2f2f2;
+}
+
+.userTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.userTable tr:hover {
+  background-color: #f1f1f1;
+}

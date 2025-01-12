@@ -7,7 +7,8 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import Login from '../pages/Login/Login.js'
 import BookManagement from '../pages/admin/bookmanagement/BookManagement.js';
 import FavoriteBookPage from '../pages/FavoritePage/FavoriteBookPage.js';
-
+import TransactionManagement from '../pages/admin/TransactionManagement.js';
+import UserManagement from '../pages/admin/UserManagement.js';
 
 const publicRoutes = [
   {path: '/', component: HomePage, layout: DefaultLayout},
@@ -26,9 +27,8 @@ const adminRoutes = [
     component: AdminDashboard, 
     children: [
       { path: 'books', component: BookManagement },
-      // { path: 'users', component: UserManagement },
-      // { path: 'transactions', component: TransactionManagement },
-      // { path: 'settings', component: Settings }
+      { path: 'users', component: UserManagement },
+      { path: 'transactions', component: TransactionManagement },
     ]
   },
 ];
