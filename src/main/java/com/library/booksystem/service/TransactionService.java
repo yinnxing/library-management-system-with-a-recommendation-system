@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -105,12 +104,35 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public Page<Transaction> getTransactions(TransactionCriteria transactionCriteria, PaginationCriteria paginationCriteria) throws BadRequestException {
+    public Page<TransactionResponse> getTransactions(TransactionCriteria transactionCriteria, PaginationCriteria paginationCriteria) throws BadRequestException {
         Page<Transaction> transactions = transactionRepository.findAll(new TransactionFilterSpecification(transactionCriteria), PageRequestBuilder.build(paginationCriteria));
-        return transactions;
+        return transactions.map(transactionMapper::toTransactionResponse);
     }
     public List<TransactionResponse> getTransactions(TransactionRequest request) {
         List<Transaction> transactions = transactionRepository.findByUser_UserIdAndStatus(request.getUserId(), request.getStatus());
         return transactions.stream().map(transactionMapper::toTransactionResponse).collect(Collectors.toList());
     }
+    public Transaction updateTransactionStatusBorrowed(String transactionId, TransactionStatus newStatus) throws BadRequestException {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new BadRequestException("Giao dịch không tồn tại"));
+        if (transaction.getStatus() == TransactionStatus.PENDING) {
+            transaction.setStatus(newStatus);
+            return transactionRepository.save(transaction);
+        } else {
+            throw new BadRequestException("Không thể cập nhật trạng thái giao dịch này, trạng thái hiện tại không phải là PENDING");
+        }
+    }
+
+    public Transaction updateTransactionStatusReturned(String transactionId, TransactionStatus newStatus) throws BadRequestException {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new BadRequestException("Giao dịch không tồn tại"));
+        if (transaction.getStatus() == TransactionStatus.BORROWED) {
+            transaction.setStatus(newStatus);
+            return transactionRepository.save(transaction);
+        } else {
+            throw new BadRequestException("Không thể cập nhật trạng thái giao dịch này, trạng thái hiện tại không phải là PENDING");
+        }
+    }
+
+
 }
