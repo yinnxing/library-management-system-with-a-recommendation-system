@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom'; 
 import styles from './AdminDashboard.module.css'; 
-import Chart from '../../components/admin/chart/Chart';
+import { useNavigate } from 'react-router-dom';  
 
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();  
+    const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/login');
+  };
+ 
+
   return (
     <div className={styles.dashboardContainer}>
       {/* Sidebar */}
@@ -15,9 +22,10 @@ const AdminDashboard = () => {
             <li><Link to="/admin/books" className={styles.navLink}>Book Management</Link></li>
             <li><Link to="/admin/users" className={styles.navLink}>User Management</Link></li>
             <li><Link to="/admin/transactions" className={styles.navLink}>Transaction Management</Link></li>
-            <li><Link to="/admin/reports" className={styles.navLink}>Reports</Link></li>
           </ul>
         </nav>
+        {/* Nút đăng xuất */}
+        <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
       </div>
 
       <div className={styles.mainContent}>
@@ -25,13 +33,6 @@ const AdminDashboard = () => {
 
         {/* Outlet để render các trang con như Book Management, User Management... */}
         <Outlet />
-        
-        <Chart 
-          fetchDataUrl="/api/admin/transactions" 
-          chartTitle="Transactions Over Time" 
-          label="Transactions" 
-          chartColor="rgba(75,192,192,1)" 
-        />
       </div>
     </div>
   );

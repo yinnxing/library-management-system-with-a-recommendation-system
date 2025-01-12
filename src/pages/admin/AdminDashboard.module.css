@@ -1,7 +1,8 @@
-
+/* General Layout */
 .dashboardContainer {
   display: flex;
   min-height: 100vh;
+  font-family: Arial, sans-serif;
 }
 
 .sidebar {
@@ -13,12 +14,15 @@
   height: 100%;
   top: 0;
   left: 0;
+  transition: width 0.3s ease;
+  width: 320px;
 }
 
 .sidebarTitle {
   font-size: 24px;
   color: #fff;
   margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .nav {
@@ -29,24 +33,49 @@
 .navLink {
   color: #ecf0f1;
   display: block;
-  padding: 8px;
+  padding: 12px;
   font-size: 18px;
   text-decoration: none;
   margin-bottom: 10px;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, padding-left 0.3s;
 }
 
 .navLink:hover {
   background-color: #34495e;
+  padding-left: 15px; /* Add left padding on hover for a more dynamic effect */
 }
 
-/* Main content area */
+/* Logout Button */
+.logoutButton {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  width: 100%;
+  margin-top: 30px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.logoutButton:hover {
+  background-color: #c0392b;
+}
+
+.logoutButton:focus {
+  outline: none;
+}
+
+/* Main Content Area */
 .mainContent {
   margin-left: 300px;
   padding: 20px;
   width: calc(100% - 300px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
 }
+
 
 .dashboardTitle {
   font-size: 28px;
@@ -63,4 +92,28 @@
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 15px;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .mainContent {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+
+  .sidebar:hover {
+    width: 200px;
+  }
+
+  .navLink {
+    font-size: 16px;
+  }
+
+  .logoutButton {
+    font-size: 14px;
+  }
 }
