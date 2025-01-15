@@ -8,6 +8,52 @@ const TransactionManagement = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('PENDING');
   const [pagination, setPagination] = useState({ page: 1, size: 10 });
+  const [chartData, setChartData] = useState([]);
+
+useEffect(() => {
+  const fetchChartData = async () => {
+    try {
+      const response = await AdminApi.getTransactions( { page: 1, size: 100 });
+      const transactionsForChart = response.data.result.content;
+      const formattedData = transactionsForChart.reduce((acc, transaction) => {
+        let date;
+
+        if (statusFilter === 'PENDING') {
+          date = transaction.borrowDate;
+        } else if (statusFilter === 'BORROWED') {
+          date = transaction.dueDate;
+        } else if (statusFilter === 'RETURNED') {
+          date = transaction.returnDate;
+        }
+
+        if (date) {
+          date = date.split('T')[0]; // Lấy phần ngày (YYYY-MM-DD)
+          if (!acc[date]) {
+            acc[date] = 0;
+          }
+          acc[date]++;
+        }
+
+        return acc;
+      }, {});
+
+      // Chuyển đổi dữ liệu sang mảng và sắp xếp
+      const sortedChartData = Object.keys(formattedData)
+        .map(date => ({
+          date,
+          count: formattedData[date]
+        }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      setChartData(sortedChartData);
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    }
+  };
+
+  fetchChartData();
+}, [statusFilter]); // Gọi lại mỗi khi tab (statusFilter) thay đổi
+
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +84,6 @@ const TransactionManagement = () => {
 
       apiMethod(transactionId)
         .then(() => {
-          // Cập nhật danh sách giao dịch sau khi thay đổi trạng thái
           setTransactions(transactions.map(transaction => 
             transaction.transactionId === transactionId ? { ...transaction, status: newStatus } : transaction
           ));
@@ -48,21 +93,6 @@ const TransactionManagement = () => {
         });
     }
   };
-
-  // Format transaction data for the chart (date and count of transactions)
-  const formattedChartData = transactions.reduce((acc, transaction) => {
-    const date = transaction.borrowDate.split('T')[0]; // Get the date in YYYY-MM-DD format
-    if (!acc[date]) {
-      acc[date] = 0;
-    }
-    acc[date]++;
-    return acc;
-  }, {});
-
-  const chartData = Object.keys(formattedChartData).map(date => ({
-    date,
-    count: formattedChartData[date]
-  }));
 
   return (
     <div className={styles.transactionManagement}>
@@ -87,6 +117,7 @@ const TransactionManagement = () => {
             <th>Book Title</th>
             <th>Borrow Date</th>
             <th>Due Date</th>
+            <th>Return Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -103,6 +134,7 @@ const TransactionManagement = () => {
                 <td>{transaction.book.title}</td>
                 <td>{transaction.borrowDate}</td>
                 <td>{transaction.dueDate}</td>
+                <td>{transaction.returnDate}</td>
                 <td>{transaction.status}</td>
                 <td>
                   {transaction.status === 'PENDING' && (

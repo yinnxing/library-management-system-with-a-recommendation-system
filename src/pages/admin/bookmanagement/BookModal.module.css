@@ -15,9 +15,9 @@
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  width: 500px;
+  width: 550px;
   max-width: 90%;
-  max-height: 80vh;
+  max-height: 95vh;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
 }
@@ -82,12 +82,12 @@ textarea {
 }
 
 button[type="submit"] {
-  background-color: #4CAF50;
+  background-color: #1976d2;
   color: white;
 }
 
 button[type="submit"]:hover {
-  background-color: #45a049;
+  background-color: #1976d2;
 }
 
 button[type="button"] {

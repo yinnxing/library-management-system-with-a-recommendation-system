@@ -1,6 +1,6 @@
 .bookManagementContainer {
   padding: 20px;
-  background-color: #f4f4f9;
+ 
 }
 
 h2 {
@@ -11,7 +11,7 @@ h2 {
 
 .addButton {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #1976d2 ;
   color: white;
   border: none;
   border-radius: 5px;
@@ -21,7 +21,7 @@ h2 {
 }
 
 .addButton:hover {
-  background-color: #45a049;
+  background-color: #1976d2 ;
 }
 
 .bookTable {
@@ -37,7 +37,7 @@ h2 {
 }
 
 .bookTable th {
-  background-color: #4CAF50;
+  background-color: #1976d2;
   color: white;
 }
 
@@ -61,21 +61,21 @@ h2 {
 }
 
 .editButton {
-  background-color: #4CAF50;
+  background-color: #1976d2;
   color: white;
 }
 
 .deleteButton {
-  background-color: #f44336;
+  background-color: #e74c3c;
   color: white;
 }
 
 .editButton:hover {
-  background-color: #45a049;
+  background-color: #1976d2 ;
 }
 
 .deleteButton:hover {
-  background-color: #e53935;
+  background-color: #e74c3c;
 }
 
 p {

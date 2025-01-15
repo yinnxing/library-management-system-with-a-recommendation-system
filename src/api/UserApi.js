@@ -72,14 +72,22 @@ axiosInstance.interceptors.response.use(
 
 const UserApi = {
     
-    getBooks(page = 1, size = 20) {
-    return axiosInstance.get('/books', {
-        params: {
-            page,
-            size
-        }
-    })
-},
+     getBooks(page = 1, size = 200) {
+        return axiosInstance.get('/books', {
+            params: {
+                page,
+                size
+            }
+        }); 
+    },
+    getPopularBooks(page = 1, size = 10) {
+        return axiosInstance.get('/books', {
+            params: {
+                page,
+                size
+            }
+        }); 
+    },
 
     getBook(id) {
         return axiosInstance.get(`/books/${id}`);
@@ -116,7 +124,11 @@ const UserApi = {
     return axiosInstance.delete('/books/wishlist', {
       data: { userId, bookId }
     });
-  }
+  },
+   submitFeedback(feedbackData) {
+        return axiosInstance.post('recommend/feedback', feedbackData);
+    },
+   
 
 };
 

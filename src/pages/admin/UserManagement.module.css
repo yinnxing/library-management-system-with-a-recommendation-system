@@ -1,11 +1,21 @@
+/* Màu chính - Xanh dương đậm */
+:root {
+  --main-color: #1976d2; /* Xanh dương đậm */
+  --secondary-color: #64b5f6; /* Xanh dương nhạt */
+  --highlight-color: #ffb300; /* Màu vàng */
+}
 .userManagementContainer {
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #fafafa;
+  border-radius: 18px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .title {
   font-size: 24px;
   margin-bottom: 20px;
+  color: #495057;
+
 }
 
 .userTable {
@@ -21,7 +31,8 @@
 }
 
 .userTable th {
-  background-color: #f2f2f2;
+  background-color: var(--main-color);
+  color: white;
 }
 
 .userTable tr:nth-child(even) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, NavLink } from 'react-router-dom';
 import Search from '../Search/Search';
 import styles from './Header.module.css';
 import { useUser } from '../../contexts/UserContext'; 
@@ -54,8 +54,19 @@ const Header = () => {
 
     {/* Menu Điều Hướng */}
     <nav className={styles.nav}>
-      <Link to="/favorite">Danh sách yêu thích</Link>
-      <Link to="/borrowBook">Mượn sách</Link>
+      <NavLink
+    to="/favorite"
+    className={({ isActive }) => isActive ? styles.activeLink : styles.button}
+  >
+    Danh sách yêu thích
+  </NavLink>
+  <NavLink
+    to="/borrowBook"
+    className={({ isActive }) => isActive ? styles.activeLink : styles.button}
+  >
+    Mượn sách
+  </NavLink>
+
 
       {/* Kiểm tra xem người dùng đã đăng nhập chưa */}
       {!isAuthenticated ? (
@@ -88,7 +99,7 @@ const Header = () => {
           >
             <span className={styles.username}>Tài khoản</span>
             <img
-              src="https://via.placeholder.com/30" 
+              src="https://media.istockphoto.com/id/1443209389/vi/vec-to/s%C3%A1ch-v%E1%BA%BD-ngu%E1%BB%87ch-ngo%E1%BA%A1c.jpg?s=612x612&w=0&k=20&c=a-bJw6Ic1FLS5Ri4TlRqOh0bREGyVO_2W52seuNupuk=" 
               alt="avatar"
               className={styles.avatar}
             />

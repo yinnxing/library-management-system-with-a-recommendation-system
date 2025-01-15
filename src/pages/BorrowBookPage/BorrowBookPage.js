@@ -1,22 +1,37 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import books from '../../assets/books';
-import styles from './BorrowBookPage.module.css'; // Tùy chọn: CSS module để styling
-import React, { useState } from 'react';
-import { useUser } from '../../contexts/UserContext'; // Import useUser hook
+import styles from './BorrowBookPage.module.css'; 
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../../contexts/UserContext';
 import UserApi from '../../api/UserApi';
+
 
 const BorrowBookPage = () => {
     const { bookId } = useParams();
     const { user } = useUser();
-    const book = books.find((b) => String(b.bookId) === bookId);
-
+    const [book, setBook] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [borrowStatus, setBorrowStatus] = useState({});
 
-    if (!book) {
-        return <p>Book not found.</p>;
-    }
+    useEffect(() => {
+        const fetchBook = async () => {
+            try {
+                setLoading(true);
+                const response = await UserApi.getBook(bookId);
+                setBook(response.data.result); 
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching book:", err);
+                setError("Failed to load book information. Please try again later.");
+                setLoading(false);
+            }
+        };
 
-    const handleBorrowBook = async () => {
+        fetchBook();
+    }, [bookId]);
+
+   const handleBorrowBook = async () => {
     try {
         console.log(user.userId);
         const response = await UserApi.borrow(user.userId, parseInt(bookId));
@@ -41,6 +56,18 @@ const BorrowBookPage = () => {
     }
 };
 
+
+    if (loading) {
+        return <p>Loading book information...</p>;
+    }
+
+    if (error) {
+        return <p>{error}</p>;
+    }
+
+    if (!book) {
+        return <p>Book not found.</p>;
+    }
 
     return (
         <div className={styles.borrowPageContainer}>
@@ -67,12 +94,16 @@ const BorrowBookPage = () => {
                 Borrow Book
             </button>
 
-            {borrowStatus && (
+            {borrowStatus.message && (
                 <div className={styles.borrowSuccess}>
                     <p>{borrowStatus.message}</p>
-                    <p><strong>Expiry Date for Offline Borrow:</strong> {borrowStatus.expiryDate}</p>
-                    <p><strong>Library Address:</strong> {borrowStatus.libraryAddress}</p>
-                    <p><strong>Contact Information:</strong> {borrowStatus.contactInfo}</p>
+                    {borrowStatus.expiryDate && (
+                        <>
+                            <p><strong>Expiry Date for Offline Borrow:</strong> {borrowStatus.expiryDate}</p>
+                            <p><strong>Library Address:</strong> {borrowStatus.libraryAddress}</p>
+                            <p><strong>Contact Information:</strong> {borrowStatus.contactInfo}</p>
+                        </>
+                    )}
                     <p className={styles.borrowNote}>
                         Please visit the library within 7 days to complete the borrowing process.
                         If you fail to do so, your request will be canceled automatically.

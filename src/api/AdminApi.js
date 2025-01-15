@@ -67,14 +67,14 @@ axiosInstance.interceptors.response.use(
 );
 
 const AdminApi = {
-    getTransactions(transactionCriteria = {}, paginationCriteria = { page: 1, size: 10 }) {
-        return axiosInstance.get('/transactions', {
-            params: {
-                ...transactionCriteria,
-                ...paginationCriteria
-            }
-        });
-    },
+    // getTransactions(transactionCriteria = {}, paginationCriteria = { page: 1, size: 10 }) {
+    //     return axiosInstance.get('/transactions', {
+    //         params: {
+    //             ...transactionCriteria,
+    //             ...paginationCriteria
+    //         }
+    //     });
+    // },
 
     createBook(request) {
         return axiosInstance.post('admin/book', request);
@@ -85,7 +85,7 @@ const AdminApi = {
     editBook(bookId, request) {
         return axiosInstance.put(`admin/${bookId}`, request);
     },
-    getBooks(page = 1, size = 20) {
+    getBooks(page = 1, size = 200) {
         return axiosInstance.get('/books', {
             params: {
                 page,
@@ -94,7 +94,7 @@ const AdminApi = {
         }); 
     },
     // eslint-disable-next-line no-dupe-keys
-    getTransactions(transactionCriteria = {}, paginationCriteria = { page: 1, size: 10 }) {
+    getTransactions(transactionCriteria = {}, paginationCriteria = { page: 1, size: 20 }) {
             return axiosInstance.get('admin/transactions', {
                 params: {
                     ...transactionCriteria,

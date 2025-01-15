@@ -2,7 +2,7 @@
 import React from 'react';
 import SearchItem from '../SearchItem/searchItem';
 import styles from './Search.module.css';
-import books from '../../assets/books'
+import books from '../../assets/all_books'
 import { useState, useEffect, useRef } from 'react';
 const Search = () => {
     const [searchTerm, setSearchTerm] = useState('');

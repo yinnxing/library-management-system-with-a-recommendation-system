@@ -1,53 +1,100 @@
+/* Màu chính - Xanh dương đậm */
+:root {
+  --main-color: #1976d2; /* Xanh dương đậm */
+  --secondary-color: #64b5f6; /* Xanh dương nhạt */
+  --highlight-color: #ffb300; /* Màu vàng */
+}
 
 .homePage {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  padding: 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carouselSection, .recommendedSection, .searchResultsSection {
+  width: 100%;
+  max-width: 1500px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.carouselSection h2,
+.recommendedSection h2,
+.searchResultsSection h2 {
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+  color: var(--main-color);
+}
+
+.carouselSection .bookList,
+.recommendedSection .bookList,
+.searchResultsSection .bookList {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+h2 {
+  color: var(--main-color);
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.filterSection {
+  width: 100%;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.categoryList {
+  display: flex;
+  justify-content: space-between;
+}
+
+.categoryButton {
+  background-color: var(--secondary-color);
+  border: 1px solid #ccc;
+  padding: 10px 2px;
+  margin: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 10px;
+  transition: background-color 0.3s, color 0.3s;
+  width: 270px;
+  height: 60px;
+}
+
+.categoryButton:hover {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.categoryButton.active {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.bookSection {
+  margin-bottom: 40px;
+  width: 100%;
+  max-width: 1500px;
+  margin-top: 20px;
   
+}
+
+@media (max-width: 768px) {
   .carouselSection, .recommendedSection, .searchResultsSection {
-    width: 100%;
-    max-width: 1400px;
-    margin-top: 20px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
   }
-  
-  .carouselSection h2,
-  .recommendedSection h2,
-  .searchResultsSection h2 {
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  
-  .carouselSection .bookList,
-  .recommendedSection .bookList,
-  .searchResultsSection .bookList {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-  }
-  
+
   h2 {
-    color: #1976d2;
-    font-size: 1.8rem;
-    margin-bottom: 15px;
+    font-size: 1.5rem;
   }
-  
-  @media (max-width: 768px) {
-    .carouselSection, .recommendedSection, .searchResultsSection {
-      padding: 15px;
-    }
-  
-    h2 {
-      font-size: 1.5rem;
-    }
-  }
-  
+}

@@ -72,7 +72,7 @@ const BookDetails = () => {
                 <p className={styles.description}><strong>Description:</strong> {descriptions || "No description available."}</p>
                 <p><strong>Total Quantity:</strong> {quantity}</p>
                 <p><strong>Available Quantity:</strong> {availableQuantity}</p>
-                <iframe src="https://books.google.com.vn/books?id=u9_BYvkvQWgC&lpg=PP1&dq=intitle:The+Street+Lawyer&hl=vi&pg=PP1&output=embed" 
+                <iframe src={previewLink}
                 width="700" height="900"></iframe>
 
             </div>

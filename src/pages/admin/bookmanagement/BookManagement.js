@@ -96,9 +96,11 @@ const handleSave = (updatedBook) => {
             <thead>
               <tr>
                 <th>Title</th>
+                <th>Genre</th>
                 <th>Author</th>
                 <th>Publisher</th>
                 <th>ISBN</th>
+                <th>Image</th>
                 <th>Quantity</th>
                 <th>Available Quantity</th>
                 <th>Actions</th>
@@ -108,9 +110,13 @@ const handleSave = (updatedBook) => {
               {books.map((book) => (
                 <tr key={book.bookId}>
                   <td>{book.title}</td>
+                  <td>{book.genre}</td>
                   <td>{book.author}</td>
                   <td>{book.publisher}</td>
                   <td>{book.isbn}</td>
+                  <td>
+                    <img src={book.coverImageUrl} alt="Book Cover" style={{ width: 50, height: 66 }} />
+                  </td>
                   <td>{book.quantity}</td>
                   <td>{book.availableQuantity}</td>
                   <td>

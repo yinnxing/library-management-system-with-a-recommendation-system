@@ -1,3 +1,9 @@
+/* Màu chính - Xanh dương đậm */
+:root {
+  --main-color: #1976d2; /* Xanh dương đậm */
+  --secondary-color: #64b5f6; /* Xanh dương nhạt */
+  --highlight-color: #ffb300; /* Màu vàng */
+}
 .header {
   display: flex;
   justify-content: space-between;
@@ -35,15 +41,36 @@
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.nav a:hover {
-  background-color: #e0f7fa; 
-  color: #007bb5; 
-  transform: scale(1.05); 
+/* Lớp chung cho tất cả các button */
+.button {
+  color: #fff;
+  padding: 10px 20px;
+  background-color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  border-radius: 5px;
+  text-decoration: none;
+  border: 1px solid var(--main-color);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); /* Thêm viền bóng */
 }
 
-.nav a:active {
-  background-color: #b2ebf2; 
+
+.button:hover {
+  background-color: var(--main-color);
+  color: #fff;
 }
+
+.activeLink {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+}
+
 
 .userMenu {
   display: flex;
@@ -55,7 +82,16 @@
 .username {
   font-size: 1rem;
   font-weight: 500;
-  color: #007bb5;
+  color: var(--secondary-color);
+  padding: 10px 20px;
+  background-color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  border-radius: 5px;
+  text-decoration: none;
+  border: 1px solid var(--main-color);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); 
 }
 
 .avatar {
@@ -98,6 +134,19 @@
   text-decoration: none;
   color: #fff;
   transition: background-color 0.3s ease;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--secondary-color);
+  padding: 10px 20px;
+  background-color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  border-radius: 5px;
+  text-decoration: none;
+  border: 1px solid var(--main-color);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); 
+
 }
 
 .loginLink:hover {
@@ -111,7 +160,9 @@
   padding: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.3s ease-out;
+  
 }
+
 
 @keyframes fadeIn {
   from {
