@@ -56,14 +56,13 @@ public class TransactionService {
         transaction.setUser(user);
         transaction.setBook(book);
         transaction.setBorrowDate(LocalDateTime.now());
-        transaction.setDueDate(LocalDateTime.now().plusDays(7));
+        //transaction.setDueDate(LocalDateTime.now().plusDays(7));
         transaction.setStatus(TransactionStatus.PENDING);
         transactionRepository.save(transaction);
         return BorrowResponse.builder()
                 .userId(transaction.getUser().getUserId())
                 .bookId(transaction.getBook().getBookId())
                 .transactionId(transaction.getTransactionId())
-                .expiryDate(transaction.getDueDate().toLocalDate().toString())
                 .status(transaction.getStatus().name())
                 .build();
     }
@@ -112,23 +111,30 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findByUser_UserIdAndStatus(request.getUserId(), request.getStatus());
         return transactions.stream().map(transactionMapper::toTransactionResponse).collect(Collectors.toList());
     }
-    public Transaction updateTransactionStatusBorrowed(String transactionId, TransactionStatus newStatus) throws BadRequestException {
+    public TransactionResponse updateTransactionStatusBorrowed(String transactionId, TransactionStatus newStatus) throws BadRequestException {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new BadRequestException("Giao dịch không tồn tại"));
         if (transaction.getStatus() == TransactionStatus.PENDING) {
             transaction.setStatus(newStatus);
-            return transactionRepository.save(transaction);
+            transaction.setDueDate(LocalDateTime.now());
+            transactionRepository.save(transaction);
+            return transactionMapper.toTransactionResponse(transaction);
         } else {
             throw new BadRequestException("Không thể cập nhật trạng thái giao dịch này, trạng thái hiện tại không phải là PENDING");
         }
     }
 
-    public Transaction updateTransactionStatusReturned(String transactionId, TransactionStatus newStatus) throws BadRequestException {
+    public TransactionResponse updateTransactionStatusReturned(String transactionId, TransactionStatus newStatus) throws BadRequestException {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new BadRequestException("Giao dịch không tồn tại"));
         if (transaction.getStatus() == TransactionStatus.BORROWED) {
             transaction.setStatus(newStatus);
-            return transactionRepository.save(transaction);
+            transaction.setReturnDate(LocalDateTime.now());
+            Book book = transaction.getBook();
+            book.setAvailableQuantity(book.getAvailableQuantity() + 1);
+            bookRepository.save(book);
+            transactionRepository.save(transaction);
+            return transactionMapper.toTransactionResponse(transaction);
         } else {
             throw new BadRequestException("Không thể cập nhật trạng thái giao dịch này, trạng thái hiện tại không phải là PENDING");
         }

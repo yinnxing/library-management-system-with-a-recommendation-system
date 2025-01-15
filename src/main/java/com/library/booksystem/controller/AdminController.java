@@ -5,7 +5,6 @@ import com.library.booksystem.dto.response.ApiResponse;
 import com.library.booksystem.dto.response.BookResponse;
 import com.library.booksystem.dto.response.TransactionResponse;
 import com.library.booksystem.enums.TransactionStatus;
-import com.library.booksystem.model.Transaction;
 import com.library.booksystem.model.specification.criteria.PaginationCriteria;
 import com.library.booksystem.model.specification.criteria.TransactionCriteria;
 import com.library.booksystem.service.BookService;
@@ -54,19 +53,19 @@ public class AdminController {
                 .build();
     }
     @PutMapping("/transactions/{transactionId}/update-borrowed")
-    public ApiResponse<Transaction> updateTransactionStatus(
+    public ApiResponse<TransactionResponse> updateTransactionStatus(
             @PathVariable String transactionId) throws BadRequestException {
-        Transaction updatedTransaction = transactionService.updateTransactionStatusBorrowed(transactionId, TransactionStatus.BORROWED);
-        return ApiResponse.<Transaction>builder()
+        TransactionResponse updatedTransaction = transactionService.updateTransactionStatusBorrowed(transactionId, TransactionStatus.BORROWED);
+        return ApiResponse.<TransactionResponse>builder()
                 .result(updatedTransaction)
                 .message("Trạng thái giao dịch đã được cập nhật thành công")
                 .build();
     }
     @PutMapping("/transactions/{transactionId}/update-returned")
-    public ApiResponse<Transaction> updateToReturnedTransactionStatus(
+    public ApiResponse<TransactionResponse> updateToReturnedTransactionStatus(
             @PathVariable String transactionId) throws BadRequestException {
-        Transaction updatedTransaction = transactionService.updateTransactionStatusReturned(transactionId, TransactionStatus.RETURNED);
-        return ApiResponse.<Transaction>builder()
+        TransactionResponse updatedTransaction = transactionService.updateTransactionStatusReturned(transactionId, TransactionStatus.RETURNED);
+        return ApiResponse.<TransactionResponse>builder()
                 .result(updatedTransaction)
                 .message("Trạng thái giao dịch đã được cập nhật thành công")
                 .build();
