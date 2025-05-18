@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Recommender System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .book-card {
+            height: 100%;
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .book-cover {
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .input-book {
+            border: 2px solid #007bff;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .tab-content {
+            padding-top: 20px;
+        }
+        h1 {
+            color: #343a40;
+            margin-bottom: 30px;
+        }
+        .method-comparison {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Hybrid Book Recommendation System</h1>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab" aria-controls="search" aria-selected="true">Book Search</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="popular-tab" data-bs-toggle="tab" data-bs-target="#popular" type="button" role="tab" aria-controls="popular" aria-selected="false">Popular Books</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="compare-tab" data-bs-toggle="tab" data-bs-target="#compare" type="button" role="tab" aria-controls="compare" aria-selected="false">Compare Methods</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- Search Tab -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        <div class="input-group mb-3">
+                            <input type="text" id="book-search" class="form-control" placeholder="Search for a book...">
+                            <button class="btn btn-primary" type="button" id="search-button">Search</button>
+                        </div>
+                        <div id="search-results" class="list-group"></div>
+                    </div>
+                </div>
+                
+                <div id="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Finding recommendations...</p>
+                </div>
+                
+                <div id="recommendations-container" class="mt-4">
+                    <h3 id="recommendation-title" class="text-center mb-4" style="display: none;">Recommendations</h3>
+                    <div id="recommendations" class="row row-cols-1 row-cols-md-5"></div>
+                </div>
+            </div>
+            
+            <!-- Popular Tab -->
+            <div class="tab-pane fade" id="popular" role="tabpanel" aria-labelledby="popular-tab">
+                <h3 class="text-center mb-4">Most Popular Books</h3>
+                <div id="popular-books" class="row row-cols-1 row-cols-md-5"></div>
+            </div>
+            
+            <!-- Compare Tab -->
+            <div class="tab-pane fade" id="compare" role="tabpanel" aria-labelledby="compare-tab">
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        <div class="input-group mb-3">
+                            <input type="text" id="compare-book-search" class="form-control" placeholder="Enter a book title to compare methods...">
+                            <button class="btn btn-primary" type="button" id="compare-button">Compare</button>
+                        </div>
+                        <div id="compare-search-results" class="list-group"></div>
+                    </div>
+                </div>
+                
+                <div id="comparison-loading" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Comparing recommendation methods...</p>
+                </div>
+                
+                <div id="comparison-results" style="display: none;">
+                    <h3 class="text-center mb-4">Recommendation Method Comparison</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card method-comparison">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Content-Based Filtering</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Recommendations based on book metadata (author, publisher, year).</p>
+                                    <ol id="content-recommendations"></ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card method-comparison">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Collaborative Filtering</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Recommendations based on user reading patterns and ratings.</p>
+                                    <ol id="collaborative-recommendations"></ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card method-comparison">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">Hybrid Approach</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Combined recommendations from multiple methods.</p>
+                                    <ol id="hybrid-recommendations"></ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load popular books on page load
+            fetch('/popular')
+                .then(response => response.json())
+                .then(data => {
+                    const popularBooksContainer = document.getElementById('popular-books');
+                    renderBooks(data, popularBooksContainer, false);
+                })
+                .catch(error => console.error('Error loading popular books:', error));
+            
+            // Book search functionality
+            const bookSearch = document.getElementById('book-search');
+            const searchResults = document.getElementById('search-results');
+            
+            bookSearch.addEventListener('input', function() {
+                if (this.value.length < 3) {
+                    searchResults.innerHTML = '';
+                    return;
+                }
+                
+                fetch(`/search?query=${encodeURIComponent(this.value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        data.forEach(title => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = title;
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                bookSearch.value = title;
+                                searchResults.innerHTML = '';
+                                getRecommendations(title);
+                            });
+                            searchResults.appendChild(item);
+                        });
+                    })
+                    .catch(error => console.error('Error searching books:', error));
+            });
+            
+            document.getElementById('search-button').addEventListener('click', function() {
+                if (bookSearch.value) {
+                    getRecommendations(bookSearch.value);
+                }
+            });
+            
+            // Compare functionality
+            const compareBookSearch = document.getElementById('compare-book-search');
+            const compareSearchResults = document.getElementById('compare-search-results');
+            
+            compareBookSearch.addEventListener('input', function() {
+                if (this.value.length < 3) {
+                    compareSearchResults.innerHTML = '';
+                    return;
+                }
+                
+                fetch(`/search?query=${encodeURIComponent(this.value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        compareSearchResults.innerHTML = '';
+                        data.forEach(title => {
+                            const item = document.createElement('a');
+                            item.href = '#';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = title;
+                            item.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                compareBookSearch.value = title;
+                                compareSearchResults.innerHTML = '';
+                                compareRecommendationMethods(title);
+                            });
+                            compareSearchResults.appendChild(item);
+                        });
+                    })
+                    .catch(error => console.error('Error searching books:', error));
+            });
+            
+            document.getElementById('compare-button').addEventListener('click', function() {
+                if (compareBookSearch.value) {
+                    compareRecommendationMethods(compareBookSearch.value);
+                }
+            });
+            
+            function getRecommendations(bookTitle) {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('recommendation-title').style.display = 'none';
+                document.getElementById('recommendations').innerHTML = '';
+                
+                fetch(`/recommend?book=${encodeURIComponent(bookTitle)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('loading').style.display = 'none';
+                        
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        document.getElementById('recommendation-title').style.display = 'block';
+                        renderBooks(data.recommendations, document.getElementById('recommendations'), true);
+                    })
+                    .catch(error => {
+                        document.getElementById('loading').style.display = 'none';
+                        console.error('Error getting recommendations:', error);
+                        alert('An error occurred while getting recommendations.');
+                    });
+            }
+            
+            function compareRecommendationMethods(bookTitle) {
+                document.getElementById('comparison-loading').style.display = 'block';
+                document.getElementById('comparison-results').style.display = 'none';
+                
+                document.getElementById('content-recommendations').innerHTML = '';
+                document.getElementById('collaborative-recommendations').innerHTML = '';
+                document.getElementById('hybrid-recommendations').innerHTML = '';
+                
+                fetch(`/compare?book=${encodeURIComponent(bookTitle)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('comparison-loading').style.display = 'none';
+                        
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        document.getElementById('comparison-results').style.display = 'block';
+                        
+                        renderRecommendationList(data.content_based, document.getElementById('content-recommendations'));
+                        renderRecommendationList(data.collaborative, document.getElementById('collaborative-recommendations'));
+                        renderRecommendationList(data.hybrid, document.getElementById('hybrid-recommendations'));
+                    })
+                    .catch(error => {
+                        document.getElementById('comparison-loading').style.display = 'none';
+                        console.error('Error comparing methods:', error);
+                        alert('An error occurred while comparing recommendation methods.');
+                    });
+            }
+            
+            function renderRecommendationList(books, container) {
+                books.forEach(book => {
+                    const li = document.createElement('li');
+                    li.textContent = book;
+                    container.appendChild(li);
+                });
+            }
+            
+            function renderBooks(books, container, highlightInputBook) {
+                container.innerHTML = '';
+                
+                books.forEach(book => {
+                    const col = document.createElement('div');
+                    col.className = 'col mb-4';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card book-card h-100';
+                    if (highlightInputBook && book.is_input) {
+                        card.classList.add('input-book');
+                    }
+                    
+                    const img = document.createElement('img');
+                    img.className = 'card-img-top book-cover';
+                    img.src = book.cover || 'https://via.placeholder.com/150x200?text=No+Image';
+                    img.alt = book.title;
+                    
+                    const cardBody = document.createElement('div');
+                    cardBody.className = 'card-body';
+                    
+                    const title = document.createElement('h5');
+                    title.className = 'card-title';
+                    title.textContent = book.title;
+                    
+                    const author = document.createElement('p');
+                    author.className = 'card-text';
+                    author.textContent = `Author: ${book.author}`;
+                    
+                    const year = document.createElement('p');
+                    year.className = 'card-text';
+                    year.textContent = `Year: ${book.year}`;
+                    
+                    cardBody.appendChild(title);
+                    cardBody.appendChild(author);
+                    cardBody.appendChild(year);
+                    
+                    card.appendChild(img);
+                    card.appendChild(cardBody);
+                    col.appendChild(card);
+                    container.appendChild(col);
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
