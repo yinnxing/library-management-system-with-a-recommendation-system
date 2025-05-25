@@ -3,6 +3,8 @@
   --main-color: #1976d2; /* Xanh dương đậm */
   --secondary-color: #64b5f6; /* Xanh dương nhạt */
   --highlight-color: #ffb300; /* Màu vàng */
+  --highlight-color-light: #ffd54f;  /* Vàng nhạt */
+  --highlight-color-dark: #ffa000; 
 }
 .header {
   display: flex;
@@ -13,9 +15,9 @@
   background-color: #f7f7f7; 
 }
 .logo a {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #4a90e2; 
+  font-size: 2.3rem;
+  font-weight: bolder;
+  color: var(--highlight-color-dark); 
   text-decoration: none;
 }
 
@@ -104,13 +106,11 @@
 
 /* User Profile Menu */
 .userProfileMenu {
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   border-radius: 5px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .userProfile button {
@@ -127,16 +127,7 @@
   background-color: #e0f7fa;
 }
 
-.loginLink {
-  padding: 10px 20px;
-  background-color: #e0f7fa; 
-  border-radius: 5px;
-  text-decoration: none;
-  color: #fff;
-  transition: background-color 0.3s ease;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--secondary-color);
+.loginButton {
   padding: 10px 20px;
   background-color: #fff;
   font-size: 16px;
@@ -145,14 +136,14 @@
   border-radius: 5px;
   text-decoration: none;
   border: 1px solid var(--main-color);
-  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3); 
-
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+  color: var(--secondary-color);
 }
 
-.loginLink:hover {
-   background-color: #e0f7fa; 
+.loginButton:hover {
+  background-color: var(--main-color);
+  color: #fff;
 }
-
 
 .tippy-box {
   background-color: #ffffff !important;
@@ -160,9 +151,74 @@
   padding: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.3s ease-out;
-  
 }
 
+/* Auth Modal Styles */
+.authModal {
+  text-align: center;
+}
+
+.authModal :global(.ant-modal-content) {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.authModal :global(.ant-modal-header) {
+  background-color: var(--main-color);
+  padding: 16px;
+  border-bottom: none;
+}
+
+.authModal :global(.ant-modal-title) {
+  color: white;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.authModal :global(.ant-modal-close) {
+  color: white;
+}
+
+.modalContent {
+  padding: 20px 10px;
+}
+
+.modalContent p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.loginModalButton, .signupModalButton {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.loginModalButton {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.signupModalButton {
+  background-color: var(--highlight-color);
+  color: white;
+}
+
+.loginModalButton:hover, .signupModalButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
 
 @keyframes fadeIn {
   from {
@@ -171,4 +227,71 @@
   to {
     opacity: 1;
   }
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+}
+
+.menuAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.userEmail {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.userProfile {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+}
+
+.userProfile button {
+  padding: 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #4a90e2;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.userProfile button:hover {
+  background-color: #f0f7ff;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+}
+
+.profileButton::before {
+  content: '👤';
+  margin-right: 8px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+}
+
+.logoutButton::before {
+  content: '🚪';
+  margin-right: 8px;
 }

@@ -1,0 +1,136 @@
+/* src/pages/UserProfile/UserProfile.module.css */
+.profileContainer {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.profileCard {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-top: 20px;
+}
+
+.profileHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.avatarContainer {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 15px;
+  border: 3px solid #f0f0f0;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileForm {
+  margin-bottom: 40px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.formGroup input:disabled,
+.formGroup textarea:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.editButton,
+.saveButton,
+.cancelButton,
+.changePasswordButton {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.editButton,
+.changePasswordButton {
+  background-color: #1976d2;
+  color: white;
+}
+
+.saveButton {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancelButton {
+  background-color: #f44336;
+  color: white;
+}
+
+.editButton:hover,
+.saveButton:hover,
+.cancelButton:hover,
+.changePasswordButton:hover {
+  transform: translateY(-2px);
+}
+
+.passwordSection {
+  border-top: 1px solid #eee;
+  padding-top: 30px;
+  margin-top: 20px;
+}
+
+.passwordSection h3 {
+  margin-bottom: 20px;
+}
+
+.passwordForm {
+  margin-top: 20px;
+}
+
+.error {
+  color: #f44336;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 5px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 18px;
+  color: #1976d2;
+  margin-top: 50px;
+}

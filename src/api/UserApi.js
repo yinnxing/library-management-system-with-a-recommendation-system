@@ -71,8 +71,9 @@ axiosInstance.interceptors.response.use(
 
 
 const UserApi = {
+    API_BASE_URL,
     
-     getBooks(page = 1, size = 200) {
+    getBooks(page = 1, size = 200) {
         return axiosInstance.get('/books', {
             params: {
                 page,
@@ -91,52 +92,75 @@ const UserApi = {
 
     getBook(id) {
         return axiosInstance.get(`/books/${id}`);
-},
+    },
+    
+    register(name, email, password) {
+        return axiosInstance.post('/auth/register', {
+            name,
+            email,
+            password
+        });
+    },
+    
     login(email, password){
         return axiosInstance.post('/auth/token', {
-        email,
-        password
-    }) 
-},
-   borrow(userId, bookId){
-    return axiosInstance.post("books/borrow", { userId, bookId });
-},
-   getRecommendedBooks(userId){
-    return axiosInstance.get(`/recommend?userId=${userId}`);
-},
-   getPendingTransactions(userId) {
-    return axiosInstance.post('transactions/search', { userId, status: 'PENDING' });
-  },
-   
-  getReturnTransactions(userId) {
-    return axiosInstance.post('transactions/search', { userId, status: 'RETURNED' });
-  },
-
- getFavoriteBooks(userId) {
-  return axiosInstance.get(`/books/wishlist?userId=${userId}`);
-},
-
-  addToFavorite(userId, bookId) {
-    return axiosInstance.post('/books/wishlist', { userId, bookId });
-  },
-
-  removeFromFavorite(userId, bookId) {
-    return axiosInstance.delete('/books/wishlist', {
-      data: { userId, bookId }
-    });
-  },
-   submitFeedback(feedbackData) {
-        return axiosInstance.post('recommend/feedback', feedbackData);
+            email,
+            password
+        }) 
+    },
+    
+    borrow(userId, bookId){
+        return axiosInstance.post("books/borrow", { userId, bookId });
+    },
+    
+    getRecommendedBooks(userId){
+        return axiosInstance.get(`/recommend?userId=${userId}`);
+    },
+    
+    getPendingTransactions(userId) {
+        return axiosInstance.post('transactions/search', { userId, status: 'PENDING' });
     },
    
+    getReturnTransactions(userId) {
+        return axiosInstance.post('transactions/search', { userId, status: 'RETURNED' });
+    },
 
-};
+    getFavoriteBooks(userId) {
+        return axiosInstance.get(`/books/wishlist?userId=${userId}`);
+    },
 
+    addToFavorite(userId, bookId) {
+        return axiosInstance.post('/books/wishlist', { userId, bookId });
+    },
 
-
-
+    removeFromFavorite(userId, bookId) {
+        return axiosInstance.delete('/books/wishlist', {
+            data: { userId, bookId }
+        });
+    },
     
+    submitFeedback(feedbackData) {
+        return axiosInstance.post('recommend/feedback', feedbackData);
+    },
 
+    getUserProfile(userId) {
+        return axiosInstance.get(`/users/${userId}/profile`);
+    },
 
+    updateUserProfile(userId, profileData) {
+        return axiosInstance.put(`/users/${userId}/profile`, profileData);
+    },
+
+    changePassword(userId, currentPassword, newPassword) {
+        return axiosInstance.post(`/users/${userId}/change-password`, {
+            currentPassword,
+            newPassword
+        });
+    },
+
+    logout() {
+        return axiosInstance.post('/auth/logout');
+    },
+};
 
 export default UserApi;

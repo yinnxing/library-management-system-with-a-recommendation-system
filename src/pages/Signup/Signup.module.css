@@ -1,4 +1,4 @@
-.loginContainer {
+.signupContainer {
     width: 100%;
     max-width: 800px;
     margin: 50px auto;
@@ -10,7 +10,7 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.loginContainer:hover {
+.signupContainer:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
@@ -52,7 +52,7 @@ input:focus {
     background-color: #ffffff;
 }
 
-.loginButton {
+.signupButton {
     width: 94%;
     padding: 12px;
     font-size: 16px;
@@ -65,7 +65,7 @@ input:focus {
     margin-top: 10px;
 }
 
-.loginButton:hover {
+.signupButton:hover {
     background-color: #0056b3;
     transform: scale(1.05);
 }
@@ -81,19 +81,19 @@ form {
     margin-top: 20px;
 }
 
-.signupLink {
+.loginLink {
     margin-top: 20px;
     font-size: 14px;
     color: #555;
 }
 
-.signupLink a {
+.loginLink a {
     color: #007bff;
     text-decoration: none;
     font-weight: 500;
 }
 
-.signupLink a:hover {
+.loginLink a:hover {
     text-decoration: underline;
 }
 
@@ -147,4 +147,4 @@ form {
     margin-right: 10px;
     width: 20px;
     height: 20px;
-}
+} 

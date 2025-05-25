@@ -113,20 +113,37 @@ const HomePage = () => {
     }
   };
 
-  const fetchRecommendBooks = async () => {
-    try {
-      console.log(user.userId);
-      const response = await UserApi.getRecommendedBooks(user.userId);
-      console.log("yin1");
-      const titleBooks = response.data.recommended_books;
-      const recommendedBooks = books.filter((b) => titleBooks.includes(b.title));
-      console.log("yin2");
-      setRecommendedBooks(recommendedBooks);
-      console.log("yin3");
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách sách:", error);
+ const fetchRecommendBooks = async () => {
+  try {
+    if (!user || !user.userId) {
+      console.error("User ID không hợp lệ");
+      return;
     }
-  };
+    console.log(user.userId);
+    const response = await UserApi.getRecommendedBooks(user.userId);
+
+    const recommendedBooksData = response.data.recommendations; // array of book objects
+
+    if (!recommendedBooksData || !Array.isArray(recommendedBooksData)) {
+      console.error("Dữ liệu recommendedBooks không đúng định dạng");
+      return;
+    }
+
+    const recommendedBooks = recommendedBooksData.map((book, index) => ({
+      bookId: book.isbn || index,
+      title: book.title,
+      author: book.author,
+      coverImageUrl: book.cover,
+      availableQuantity: 5, // giả định, nếu bạn có data thật thì thay thế
+    }));
+
+    setRecommendedBooks(recommendedBooks);
+    console.log("Danh sách sách đề xuất đã được cập nhật");
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách sách:", error);
+  }
+};
+
 
   const filterBooksByCategory = () => {
   if (selectedCategory === "All") {

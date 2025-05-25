@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, Link } from 'react-router-dom'; 
 import styles from './Login.module.css'; 
 import UserApi from '../../api/UserApi';
 import Cookies from 'js-cookie';
@@ -12,6 +12,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showLoginModal, setShowLoginModal] = useState(false);
     const navigate = useNavigate(); 
 
     const handleSubmit = async (e) => {
@@ -57,6 +58,23 @@ const Login = () => {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            // Redirect to Google OAuth with the correct callback URL
+            window.location.href = `${UserApi.API_BASE_URL}/oauth2/authorization/google?redirect_uri=${window.location.origin}/oauth2/callback`;
+        } catch (error) {
+            setError('Error connecting to Google authentication.');
+        }
+    };
+
+    const handleFacebookLogin = async () => {
+        try {
+            // This would typically redirect to Facebook OAuth
+            window.location.href = `${UserApi.API_BASE_URL}/auth/facebook`;
+        } catch (error) {
+            setError('Error connecting to Facebook authentication.');
+        }
+    };
    
     return (
         <div className={styles.loginContainer}> 
@@ -85,8 +103,38 @@ const Login = () => {
                     />
                 </div>
 
-                <button type="submit">Login</button>
+                <button type="submit" className={styles.loginButton}>Login</button>
+                
+                <div className={styles.signupLink}>
+                    Don't have an account? <Link to="/signup">Sign up</Link>
+                </div>
             </form>
+            
+            <div className={styles.socialLogin}>
+                <p>Or login with</p>
+                <div className={styles.socialButtons}>
+                    <button 
+                        className={styles.googleButton}
+                        onClick={handleGoogleLogin}
+                    >
+                        <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" 
+                            alt="Google" 
+                        />
+                        Google
+                    </button>
+                    <button 
+                        className={styles.facebookButton}
+                        onClick={handleFacebookLogin}
+                    >
+                        <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1024px-Facebook_Logo_%282019%29.png" 
+                            alt="Facebook" 
+                        />
+                        Facebook
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

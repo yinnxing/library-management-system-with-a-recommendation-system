@@ -13,7 +13,6 @@ const TransactionBook = ({ transaction }) => {
         <p className={styles.bookGenre}>Thể loại: {book.genre || 'Không rõ'}</p>
         <div className={styles.transactionDetails}>
           <p><strong>Ngày mượn:</strong> {new Date(borrowDate).toLocaleDateString()}</p>
-          <p><strong>Ngày trả dự kiến:</strong> {new Date(dueDate).toLocaleDateString()}</p>
           <p><strong>Ngày trả:</strong> {returnDate ? new Date(returnDate).toLocaleDateString() : 'Chưa trả'}</p>
           <p><strong>Trạng thái:</strong> {status}</p>
         </div>
