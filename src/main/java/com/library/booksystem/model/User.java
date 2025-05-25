@@ -3,6 +3,7 @@ package com.library.booksystem.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 @Getter
@@ -26,6 +27,18 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(name = "provider")
+    private String provider;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Column(name = "dob")
+    private LocalDate dob;
+
+    @Column(name = "gender")
+    private String gender;
 
     private String role;
 

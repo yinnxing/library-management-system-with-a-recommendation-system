@@ -21,7 +21,8 @@ public enum ErrorCode {
     BOOK_NOT_FOUND(1010, "Book not found", HttpStatus.NOT_FOUND),
     BOOK_NOT_AVAILABLE(1011, "book is not available", HttpStatus.BAD_REQUEST),
     PAGE_NUMBER_INVALID(1012, "page number must be greater than 0", HttpStatus.BAD_REQUEST),
-    SIZE_INVALID(1013, "size must be greater than 0", HttpStatus.BAD_REQUEST)
+    SIZE_INVALID(1013, "size must be greater than 0", HttpStatus.BAD_REQUEST),
+    OAUTH2_PROVIDER_NOT_SUPPORTED(1014, "OAuth2 provider not supported", HttpStatus.BAD_REQUEST)
 
 
     ;
