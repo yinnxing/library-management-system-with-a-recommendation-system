@@ -32,6 +32,9 @@ public class Review {
 
     private String comment;
 
+    @Column(name = "is_visible", nullable = false)
+    private boolean isVisible = true;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
