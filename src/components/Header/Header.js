@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, NavLink } from 'react-router-dom';
 import Search from '../Search/Search';
+import '../../styles/design-system.css';
 import styles from './Header.module.css';
 import { useUser } from '../../contexts/UserContext'; 
 import Cookies from 'js-cookie';
@@ -61,6 +62,11 @@ const Header = () => {
     navigate('/user-profile');
   };
 
+  const goToBorrowBook = () => {
+    setVisible(false);
+    navigate('/borrowBook');
+  };
+
   return (
     <header className={styles.header}>
       {/* Logo */}
@@ -75,23 +81,24 @@ const Header = () => {
 
       {/* Navigation Menu */}
       <nav className={styles.nav}>
+        
         <NavLink
-          to="/favorite"
+          to="/suggestions"
           className={({ isActive }) => isActive ? styles.activeLink : styles.button}
         >
-          Danh sách yêu thích
-        </NavLink>
-        <NavLink
-          to="/borrowBook"
-          className={({ isActive }) => isActive ? styles.activeLink : styles.button}
-        >
-          Mượn sách
+          Gợi ý sách
         </NavLink>
         <NavLink
           to="/advanced-search"
           className={({ isActive }) => isActive ? styles.activeLink : styles.button}
         >
-          Advanced Search
+          Tìm kiếm nâng cao
+        </NavLink>
+        <NavLink
+          to="/favorite"
+          className={({ isActive }) => isActive ? styles.activeLink : styles.button}
+        >
+          Danh sách yêu thích
         </NavLink>
 
         {/* Authentication UI - Shows login button or user menu based on auth state */}
@@ -122,9 +129,15 @@ const Header = () => {
                     <span className={styles.userEmail}>{user?.email}</span>
                   </div>
                   <button onClick={goToProfile} className={styles.profileButton}>
+                    <span className={styles.menuIcon}>👤</span>
                     My Profile
                   </button>
+                  <button onClick={goToBorrowBook} className={styles.borrowButton}>
+                    <span className={styles.menuIcon}>📚</span>
+                    Quản lý mượn sách
+                  </button>
                   <button onClick={handleLogout} className={styles.logoutButton}>
+                    <span className={styles.menuIcon}>🚪</span>
                     Đăng xuất
                   </button>
                 </div>

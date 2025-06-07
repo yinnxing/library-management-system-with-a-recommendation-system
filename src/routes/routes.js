@@ -13,6 +13,7 @@ import UserManagement from '../pages/admin/UserManagement.js';
 import UserProfile from '../pages/UserProfile/UserProfile.js';
 import OAuthCallback from '../pages/OAuthCallback/OAuthCallback.js';
 import AdvancedSearchPage from '../pages/AdvancedSearchPage/AdvancedSearchPage.tsx';
+import BookSuggestions from '../pages/BookSuggestions/BookSuggestions.js';
 
 const publicRoutes = [
   {path: '/', component: HomePage, layout: DefaultLayout},
@@ -21,6 +22,7 @@ const publicRoutes = [
   {path: '/books', component: BookDetails, layout: DefaultLayout, childPath:':bookId'},
   {path: '/borrow', component: BorrowBookPage, layout: DefaultLayout, childPath:':bookId'},
   {path: '/favorite', component: FavoriteBookPage, layout: DefaultLayout},
+  {path: '/suggestions', component: BookSuggestions, layout: DefaultLayout},
   {path: '/borrowBook', component: BorrowManagementPage, layout: DefaultLayout},
   {path: '/user-profile', component: UserProfile, layout: DefaultLayout},
   {path: '/oauth2/callback', component: OAuthCallback, layout: DefaultLayout},

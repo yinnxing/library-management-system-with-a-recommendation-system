@@ -85,11 +85,25 @@ const AdminApi = {
     editBook(bookId, request) {
         return axiosInstance.put(`admin/${bookId}`, request);
     },
-    getBooks(page = 1, size = 200) {
+    getBooks(page = 1, size = 12, genre = null) {
+        const params = {
+            page,
+            size
+        };
+        
+        if (genre && genre !== 'All') {
+            params.genre = genre;
+        }
+        
+        return axiosInstance.get('/books', {
+            params
+        }); 
+    },
+    getAllBooks() {
         return axiosInstance.get('/books', {
             params: {
-                page,
-                size
+                page: 1,
+                size: 10000
             }
         }); 
     },

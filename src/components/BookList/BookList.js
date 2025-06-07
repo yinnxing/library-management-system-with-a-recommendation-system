@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import '../../styles/design-system.css';
 import styles from './BookList.module.css';
 import { Link } from 'react-router-dom'; 
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -7,7 +8,7 @@ import UserApi from '../../api/UserApi';
 
 
 
-const BookList = ({ books, userId }) => {
+const BookList = ({ books, userId, onFavoriteUpdate }) => {
   const [favoriteBooks, setFavoriteBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,6 +58,11 @@ const BookList = ({ books, userId }) => {
       await addToFavorites(bookId); 
       setFavoriteBooks((prev) => [...prev, bookId]);
     }
+    
+    // Call the callback to notify parent component of favorite update
+    if (onFavoriteUpdate) {
+      onFavoriteUpdate();
+    }
   } catch (error) {
     console.error('Error toggling favorite:', error);
   }
@@ -95,8 +101,8 @@ return (
             <div className={styles.bookInfo}>
               <Link to={`/books/${book.bookId}`}>
                 <h3>{book.title}</h3>
-                <p><strong>Author:</strong> {book.author}</p>
-                <p><strong>Available:</strong> {book.availableQuantity}</p>
+                <p><strong>Tác giả:</strong> {book.author}</p>
+                <p><strong>Còn lại:</strong> {book.availableQuantity}</p>
               </Link>
 
               {/* Nút mượn sách */}
@@ -109,7 +115,7 @@ return (
                   disabled={book.availableQuantity === 0} 
                   className={styles.borrowButton}
                 >
-                  {book.availableQuantity > 0 ? 'Borrow Book' : 'Unavailable'}
+                  {book.availableQuantity > 0 ? 'Mượn sách' : 'Unavailable'}
                 </button>
               </Link>
             </div>

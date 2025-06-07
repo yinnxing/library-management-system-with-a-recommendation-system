@@ -2,90 +2,272 @@
 
 .transactionBookItem {
   display: flex;
-  padding: 20px;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 15px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  background: var(--surface-color, #ffffff);
+  border-radius: var(--border-radius-lg, 12px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  padding: var(--spacing-lg, 24px);
+  margin-bottom: var(--spacing-md, 16px);
+  transition: all var(--transition-normal, 0.3s ease);
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+  position: relative;
+  overflow: hidden;
 }
 
 .transactionBookItem:hover {
-  background-color: #eaeaea;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  border-color: var(--primary-color, #627d98);
+}
+
+.bookCoverContainer {
+  flex-shrink: 0;
+  margin-right: var(--spacing-lg, 24px);
+  position: relative;
 }
 
 .bookCover {
   width: 120px;
   height: 180px;
   object-fit: cover;
-  margin-right: 20px;
-  border-radius: 8px;
+  border-radius: var(--border-radius-md, 8px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform var(--transition-normal, 0.3s ease);
+}
+
+.transactionBookItem:hover .bookCover {
+  transform: scale(1.02);
 }
 
 .bookDetails {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.bookInfo {
+  flex-shrink: 0;
 }
 
 .bookTitle {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 0 0 10px;
-  color: #333;
+  font-family: var(--font-family-display, 'Playfair Display', serif);
+  font-size: var(--font-size-xl, 20px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 var(--spacing-xs, 8px) 0;
+  line-height: var(--line-height-tight, 1.25);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .bookAuthor {
-  font-size: 16px;
-  margin: 0 0 5px;
-  color: #555;
+  font-size: var(--font-size-base, 16px);
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 var(--spacing-xs, 8px) 0;
+  font-weight: var(--font-weight-medium, 500);
 }
 
-.bookGenre {
-  font-size: 14px;
-  margin: 0 0 10px;
-  color: #777;
+.bookMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text-tertiary, #9ca3af);
+  margin: 0;
 }
 
-.previewLink {
-  font-size: 14px;
-  color: #007bff;
-  text-decoration: none;
-  margin-top: 10px;
-  transition: color 0.3s ease;
+.genre {
+  background: var(--accent-light, #fef3c7);
+  color: var(--accent-dark, #92400e);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border-radius: var(--border-radius-sm, 4px);
+  font-weight: var(--font-weight-medium, 500);
+  font-size: var(--font-size-xs, 12px);
 }
 
-.previewLink:hover {
-  color: #0056b3;
+.separator {
+  color: var(--border-color, #e5e7eb);
+}
+
+.year {
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.transactionInfo {
+  flex: 1;
+  background: var(--surface-secondary, #f9fafb);
+  border-radius: var(--border-radius-md, 8px);
+  padding: var(--spacing-md, 16px);
+  border: 1px solid var(--border-color-light, #f3f4f6);
+}
+
+.transactionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md, 16px);
+  padding-bottom: var(--spacing-sm, 12px);
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.transactionTitle {
+  font-size: var(--font-size-lg, 18px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary, #1f2937);
+  margin: 0;
+}
+
+.status {
+  padding: var(--spacing-xs, 6px) var(--spacing-sm, 12px);
+  border-radius: var(--border-radius-full, 9999px);
+  font-size: var(--font-size-xs, 12px);
+  font-weight: var(--font-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusBorrowed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.statusReturned {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.statusOverdue {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.statusPending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.statusDefault {
+  background-color: var(--surface-tertiary, #f3f4f6);
+  color: var(--text-secondary, #6b7280);
 }
 
 .transactionDetails {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 12px);
 }
 
-.transactionDetails p {
-  margin: 5px 0;
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-sm, 10px) 0;
+  border-bottom: 1px solid var(--border-color-light, #f3f4f6);
 }
 
-.transactionDetails strong {
-  color: #333;
+.detailRow:last-child {
+  border-bottom: none;
 }
 
-.transactionDetails .status {
-  font-weight: bold;
-  text-transform: capitalize;
+.label {
+  font-size: var(--font-size-sm, 14px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary, #6b7280);
+  flex-shrink: 0;
+  width: 140px;
 }
 
-.transactionDetails .status.pending {
-  color: #ff9800; /* Orange for pending */
+.value {
+  font-size: var(--font-size-sm, 14px);
+  color: var(--text-primary, #1f2937);
+  text-align: right;
+  word-break: break-all;
+  position: relative;
 }
 
-.transactionDetails .status.completed {
-  color: #4caf50; /* Green for completed */
+.overdue {
+  color: #dc2626 !important;
+  font-weight: var(--font-weight-semibold, 600);
 }
 
-.transactionDetails .status.overdue {
-  color: #f44336; /* Red for overdue */
+.overdueLabel {
+  display: inline-block;
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm, 4px);
+  font-size: var(--font-size-xs, 11px);
+  font-weight: var(--font-weight-semibold, 600);
+  margin-left: var(--spacing-xs, 8px);
+  text-transform: uppercase;
+}
+
+.feeAmount {
+  color: #dc2626;
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .transactionBookItem {
+    flex-direction: column;
+    padding: var(--spacing-md, 16px);
+  }
+
+  .bookCoverContainer {
+    margin-right: 0;
+    margin-bottom: var(--spacing-md, 16px);
+    align-self: center;
+  }
+
+  .bookCover {
+    width: 100px;
+    height: 150px;
+  }
+
+  .bookDetails {
+    gap: var(--spacing-sm, 12px);
+  }
+
+  .transactionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm, 8px);
+  }
+
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs, 4px);
+  }
+
+  .label {
+    width: auto;
+  }
+
+  .value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .transactionBookItem {
+    padding: var(--spacing-sm, 12px);
+    margin-bottom: var(--spacing-sm, 12px);
+  }
+
+  .bookTitle {
+    font-size: var(--font-size-lg, 18px);
+  }
+
+  .transactionTitle {
+    font-size: var(--font-size-base, 16px);
+  }
+
+  .transactionInfo {
+    padding: var(--spacing-sm, 12px);
+  }
 }

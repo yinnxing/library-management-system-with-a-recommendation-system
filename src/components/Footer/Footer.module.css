@@ -1,0 +1,486 @@
+/* Import design system */
+@import '../../styles/design-system.css';
+
+/* ===== MAIN FOOTER ===== */
+.footer {
+    background: linear-gradient(135deg, var(--primary-800), var(--primary-900));
+    color: var(--text-inverse);
+    margin-top: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-600), var(--secondary-500), var(--primary-600));
+}
+
+/* ===== CONTAINER ===== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+/* ===== FOOTER CONTENT ===== */
+.footerContent {
+    padding: var(--space-12) 0 var(--space-8) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footerContent .container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: var(--space-8);
+}
+
+/* ===== SECTIONS ===== */
+.section {
+    display: flex;
+    flex-direction: column;
+}
+
+.sectionTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-inverse);
+    margin: 0 0 var(--space-4) 0;
+    position: relative;
+    padding-bottom: var(--space-2);
+}
+
+.sectionTitle::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--secondary-500), var(--secondary-400));
+    border-radius: var(--radius-full);
+}
+
+/* ===== BRAND SECTION ===== */
+.brandSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.brandTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-inverse);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.brandIcon {
+    font-size: var(--text-3xl);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.brandDescription {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    max-width: 300px;
+}
+
+/* ===== SOCIAL LINKS ===== */
+.socialLinks {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.socialLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    color: var(--text-inverse);
+    text-decoration: none;
+    transition: var(--transition-base);
+    backdrop-filter: blur(8px);
+}
+
+.socialLink:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--secondary-400);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.socialLink span {
+    font-size: var(--text-lg);
+}
+
+/* ===== QUICK LINKS ===== */
+.linkList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.footerLink {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: var(--text-base);
+    transition: var(--transition-base);
+    padding: var(--space-1) 0;
+    position: relative;
+}
+
+.footerLink:hover {
+    color: var(--secondary-300);
+    padding-left: var(--space-2);
+}
+
+.footerLink::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--secondary-400);
+    transition: var(--transition-base);
+}
+
+.footerLink:hover::before {
+    width: 12px;
+}
+
+/* ===== CONTACT INFO ===== */
+.contactList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.contactItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.contactIcon {
+    font-size: var(--text-lg);
+    margin-top: var(--space-1);
+    flex-shrink: 0;
+}
+
+.contactContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.contactLabel {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: var(--font-medium);
+}
+
+.contactValue {
+    font-size: var(--text-base);
+    color: var(--text-inverse);
+    line-height: var(--leading-normal);
+}
+
+/* ===== NEWSLETTER ===== */
+.newsletterDescription {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 var(--space-4) 0;
+    line-height: var(--leading-normal);
+}
+
+.newsletterForm {
+    display: flex;
+    gap: var(--space-2);
+    flex-direction: column;
+}
+
+.newsletterInput {
+    padding: var(--space-3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-inverse);
+    font-size: var(--text-base);
+    backdrop-filter: blur(8px);
+    transition: var(--transition-base);
+}
+
+.newsletterInput::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletterInput:focus {
+    outline: none;
+    border-color: var(--secondary-400);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.newsletterButton {
+    padding: var(--space-3) var(--space-4);
+    background: linear-gradient(135deg, var(--secondary-500), var(--secondary-600));
+    color: var(--text-inverse);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.newsletterButton:hover {
+    background: linear-gradient(135deg, var(--secondary-600), var(--secondary-700));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ===== POLICIES SECTION ===== */
+.policiesSection {
+    background: rgba(0, 0, 0, 0.2);
+    padding: var(--space-8) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.policiesTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--text-inverse);
+    margin: 0 0 var(--space-6) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+    justify-content: center;
+}
+
+.policiesIcon {
+    font-size: var(--text-3xl);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.policiesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+}
+
+.policyCard {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    transition: var(--transition-base);
+    backdrop-filter: blur(8px);
+}
+
+.policyCard:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--secondary-400);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.policyHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.policyIcon {
+    font-size: var(--text-2xl);
+    flex-shrink: 0;
+}
+
+.policyInfo {
+    flex: 1;
+}
+
+.policyTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-bold);
+    color: var(--text-inverse);
+    margin: 0 0 var(--space-1) 0;
+    line-height: var(--leading-tight);
+}
+
+.policyValue {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--secondary-300);
+    display: block;
+}
+
+.policyDescription {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+}
+
+/* ===== BOTTOM BAR ===== */
+.bottomBar {
+    background: rgba(0, 0, 0, 0.3);
+    padding: var(--space-4) 0;
+}
+
+.bottomContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.copyright p {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.legalLinks {
+    display: flex;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+}
+
+.legalLink {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: var(--transition-base);
+}
+
+.legalLink:hover {
+    color: var(--secondary-300);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .footerContent .container {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-6);
+    }
+    
+    .policiesGrid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-3);
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 var(--space-4);
+    }
+    
+    .footerContent {
+        padding: var(--space-8) 0 var(--space-6) 0;
+    }
+    
+    .footerContent .container {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+    
+    .policiesSection {
+        padding: var(--space-6) 0;
+    }
+    
+    .policiesTitle {
+        font-size: var(--text-xl);
+        margin-bottom: var(--space-4);
+    }
+    
+    .policiesGrid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+    
+    .policyCard {
+        padding: var(--space-4);
+    }
+    
+    .bottomContent {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-3);
+    }
+    
+    .legalLinks {
+        justify-content: center;
+        gap: var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--space-3);
+    }
+    
+    .footerContent {
+        padding: var(--space-6) 0 var(--space-4) 0;
+    }
+    
+    .brandTitle {
+        font-size: var(--text-xl);
+    }
+    
+    .socialLinks {
+        justify-content: center;
+    }
+    
+    .newsletterForm {
+        gap: var(--space-3);
+    }
+    
+    .policiesTitle {
+        font-size: var(--text-lg);
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .policyHeader {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-2);
+    }
+    
+    .policyInfo {
+        text-align: center;
+    }
+    
+    .legalLinks {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+} 

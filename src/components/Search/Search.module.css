@@ -22,6 +22,13 @@
   border-color: #f0c000; 
   box-shadow: 0 0 12px rgba(240, 192, 64, 0.6); 
 }
+
+.search input[type="text"]:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .resultsContainer {
     position: absolute;
     top: 100%;
@@ -36,4 +43,137 @@
     z-index: 10;
     margin-top: 5px;
     padding: 5px 0;
+}
+
+/* Loading State */
+.loadingContainer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 290px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 5px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.loadingSpinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #f0c000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.errorContainer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 290px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 5px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e74c3c;
+    font-size: 0.9em;
+}
+
+.errorIcon {
+    font-size: 1.1em;
+}
+
+/* No Results State */
+.noResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 290px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 5px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.noResultsIcon {
+    font-size: 1.1em;
+}
+
+/* More Results Indicator */
+.moreResults {
+    padding: 10px 20px;
+    text-align: center;
+    color: #666;
+    font-size: 0.85em;
+    font-style: italic;
+    border-top: 1px solid #eee;
+    background-color: #f9f9f9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search {
+        width: 250px;
+        margin-right: 20px;
+    }
+    
+    .resultsContainer,
+    .loadingContainer,
+    .errorContainer,
+    .noResults {
+        width: 250px;
+    }
+    
+    .search input[type="text"] {
+        padding: 10px 16px;
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .search {
+        width: 200px;
+        margin-right: 10px;
+    }
+    
+    .resultsContainer,
+    .loadingContainer,
+    .errorContainer,
+    .noResults {
+        width: 200px;
+    }
+    
+    .search input[type="text"] {
+        padding: 8px 14px;
+        font-size: 0.9em;
+    }
 }

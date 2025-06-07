@@ -81,7 +81,23 @@ const UserApi = {
             }
         }); 
     },
-    getPopularBooks(page = 1, size = 10) {
+
+    getBooksByCategory(page = 1, size = 12, genre = null) {
+        const params = {
+            page,
+            size
+        };
+        
+        if (genre && genre !== 'All') {
+            params.genre = genre;
+        }
+        
+        return axiosInstance.get('/books', {
+            params
+        }); 
+    },
+
+    getPopularBooks(page = 2, size = 10) {
         return axiosInstance.get('/books', {
             params: {
                 page,
@@ -94,9 +110,9 @@ const UserApi = {
         return axiosInstance.get(`/books/${id}`);
     },
     
-    register(name, email, password) {
-        return axiosInstance.post('/auth/register', {
-            name,
+    register(username, email, password) {
+        return axiosInstance.post('/users', {
+            username,
             email,
             password
         });
@@ -121,8 +137,25 @@ const UserApi = {
         return axiosInstance.post('transactions/search', { userId, status: 'PENDING' });
     },
    
+    getBorrowedBooks(userId) {
+        return axiosInstance.post('transactions/search', { userId, status: 'BORROWED' });
+    },
+
     getReturnTransactions(userId) {
         return axiosInstance.post('transactions/search', { userId, status: 'RETURNED' });
+    },
+
+    getCancelledTransactions(userId) {
+        return axiosInstance.post('transactions/search', { userId, status: 'CANCELLED' });
+    },
+
+    getOverdueTransactions(userId) {
+        return axiosInstance.post('transactions/search', { userId, status: 'OVERDUE' });
+    },
+
+    // Unified method to get transactions by status
+    getTransactionsByStatus(userId, status) {
+        return axiosInstance.post('transactions/search', { userId, status });
     },
 
     getFavoriteBooks(userId) {
@@ -160,6 +193,25 @@ const UserApi = {
 
     logout() {
         return axiosInstance.post('/auth/logout');
+    },
+
+    // Get current user's information using security context
+    getMyInfo() {
+        return axiosInstance.get('/users/myInfo');
+    },
+
+    // Review APIs
+    getBookReviews(bookId, page = 0, size = 20) {
+        return axiosInstance.get(`/reviews/book/${bookId}`, {
+            params: {
+                page,
+                size
+            }
+        });
+    },
+
+    submitReview(reviewData) {
+        return axiosInstance.post('/reviews', reviewData);
     },
 };
 

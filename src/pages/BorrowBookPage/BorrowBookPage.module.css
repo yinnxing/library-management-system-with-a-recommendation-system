@@ -1,95 +1,750 @@
-/* Container chính */
-.borrowPageContainer {
-    max-width: 800px;
+/* Import design system */
+@import '../../styles/design-system.css';
+
+/* ===== MAIN CONTAINER ===== */
+.container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: var(--space-6);
+    background-color: var(--bg-primary);
+    min-height: calc(100vh - 80px);
 }
 
-/* Tiêu đề */
-.title {
-    font-size: 2rem;
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Thông tin sách */
-.bookInfo {
+/* ===== HEADER SECTION ===== */
+.headerSection {
     display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
+    border-bottom: 2px solid var(--primary-200);
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    font-family: var(--font-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--primary-700);
+    background-color: var(--primary-50);
+    border: 1px solid var(--primary-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition-base);
+    text-decoration: none;
+}
+
+.backButton:hover {
+    background-color: var(--primary-100);
+    border-color: var(--primary-300);
+    transform: translateX(-2px);
+}
+
+.pageTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.titleIcon {
+    font-size: var(--text-4xl);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* ===== MAIN CONTENT ===== */
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+/* ===== BOOK CARD ===== */
+.bookCard {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    position: relative;
+}
+
+.bookCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-600), var(--secondary-500), var(--primary-600));
+}
+
+.bookHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: var(--space-6) var(--space-6) var(--space-4) var(--space-6);
+    background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
+    border-bottom: 1px solid var(--border-light);
+}
+
+.bookTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-800);
+    margin: 0;
+    line-height: var(--leading-tight);
+    flex: 1;
+    margin-right: var(--space-4);
+}
+
+.availabilityBadge {
+    flex-shrink: 0;
+}
+
+.available {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: linear-gradient(135deg, var(--success-50), var(--success-100));
+    color: var(--success-600);
+    border: 1px solid var(--success-200);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.unavailable {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: linear-gradient(135deg, var(--error-50), var(--error-100));
+    color: var(--error-600);
+    border: 1px solid var(--error-200);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.bookContent {
+    display: flex;
+    gap: var(--space-8);
+    padding: var(--space-6);
+}
+
+/* ===== BOOK IMAGE ===== */
+.bookImageContainer {
+    flex-shrink: 0;
+    position: relative;
 }
 
 .bookImage {
-    width: 200px;
-    height: 300px;
+    width: 280px;
+    height: 400px;
     object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    transition: var(--transition-base);
+    border: 3px solid var(--bg-primary);
 }
 
+.bookImage:hover {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.imageOverlay {
+    position: absolute;
+    bottom: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    color: var(--text-inverse);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.overlayText {
+    display: block;
+}
+
+/* ===== BOOK DETAILS ===== */
 .bookDetails {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.detailItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-base);
+}
+
+.detailItem:hover {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+    transform: translateY(-1px);
+}
+
+.detailIcon {
+    font-size: var(--text-xl);
+    flex-shrink: 0;
+}
+
+.detailContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
     flex: 1;
 }
 
-.bookDetails p {
-    margin: 10px 0;
-    font-size: 1rem;
-    color: #555;
+.detailLabel {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: var(--font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-.bookDetails strong {
-    color: #333;
+.detailValue {
+    font-size: var(--text-lg);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
 }
 
-/* Nút mượn sách */
+/* ===== BORROW BUTTON ===== */
 .borrowButton {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007BFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-6);
+    font-family: var(--font-primary);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--text-inverse);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
     border: none;
-    border-radius: 5px;
+    border-radius: var(--radius-xl);
     cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s;
+    transition: var(--transition-base);
+    margin-top: auto;
+    width: 100%;
+    height: 56px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
 }
 
-.borrowButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+.borrowButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: var(--transition-base);
 }
 
 .borrowButton:hover:not(:disabled) {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
-/* Thông tin mượn thành công */
-.borrowSuccess {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #eaffea;
-    border: 1px solid #28a745;
-    border-radius: 5px;
-    color: #28a745;
+.borrowButton:hover:not(:disabled)::before {
+    left: 100%;
 }
 
-.borrowSuccess p {
-    margin: 10px 0;
-    font-size: 1rem;
+.borrowButton:disabled {
+    color: var(--text-tertiary);
+    background: linear-gradient(135deg, var(--neutral-300), var(--neutral-400));
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: var(--shadow-sm);
+    opacity: 0.7;
 }
 
-/* Ghi chú */
-.borrowNote {
-    font-size: 0.9rem;
-    color: #555;
-    font-style: italic;
-    margin-top: 10px;
+.buttonSpinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid var(--text-inverse);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== STATUS CARD ===== */
+.statusCard {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+}
+
+.statusCard.success {
+    background: linear-gradient(135deg, var(--success-50), var(--success-100));
+    border-color: var(--success-200);
+}
+
+.statusCard.error {
+    background: linear-gradient(135deg, var(--error-50), var(--error-100));
+    border-color: var(--error-200);
+}
+
+.statusHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.statusIcon {
+    font-size: var(--text-2xl);
+}
+
+.statusTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    margin: 0;
+}
+
+.statusCard.success .statusTitle {
+    color: var(--success-700);
+}
+
+.statusCard.error .statusTitle {
+    color: var(--error-700);
+}
+
+.statusMessage {
+    font-size: var(--text-lg);
+    margin: 0 0 var(--space-6) 0;
+    line-height: var(--leading-relaxed);
+}
+
+.statusCard.success .statusMessage {
+    color: var(--success-600);
+}
+
+.statusCard.error .statusMessage {
+    color: var(--error-600);
+}
+
+/* ===== BORROW DETAILS ===== */
+.borrowDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.borrowDetailItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--success-200);
+}
+
+.borrowDetailIcon {
+    font-size: var(--text-lg);
+    margin-top: var(--space-1);
+    flex-shrink: 0;
+}
+
+.borrowDetailLabel {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: var(--font-semibold);
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.borrowDetailValue {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+    display: block;
+}
+
+.importantNote {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: linear-gradient(135deg, var(--warning-50), var(--warning-100));
+    border: 1px solid var(--warning-200);
+    border-radius: var(--radius-lg);
+    margin-top: var(--space-2);
+}
+
+.noteIcon {
+    font-size: var(--text-lg);
+    margin-top: var(--space-1);
+    flex-shrink: 0;
+}
+
+.importantNote p {
+    font-size: var(--text-sm);
+    color: var(--warning-700);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+    font-weight: var(--font-medium);
+}
+
+/* ===== SECTIONS ===== */
+.policiesSection,
+.libraryInfoSection {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+}
+
+.sectionTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-800);
+    margin: 0 0 var(--space-6) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.sectionIcon {
+    font-size: var(--text-3xl);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* ===== POLICIES GRID ===== */
+.policiesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+}
+
+.policyCard {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    transition: var(--transition-base);
+}
+
+.policyCard:hover {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.policyHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.policyIcon {
+    font-size: var(--text-2xl);
+    flex-shrink: 0;
+}
+
+.policyInfo {
+    flex: 1;
+}
+
+.policyTitle {
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1) 0;
+    line-height: var(--leading-tight);
+}
+
+.policyValue {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--primary-600);
+    display: block;
+}
+
+.policyDescription {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+}
+
+/* ===== LIBRARY INFO ===== */
+.libraryInfoCard {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    border: 1px solid var(--border-light);
+}
+
+.libraryHeader {
+    margin-bottom: var(--space-6);
+    text-align: center;
+}
+
+.libraryName {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+}
+
+.libraryIcon {
+    font-size: var(--text-2xl);
+}
+
+.libraryDetails {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+}
+
+.libraryDetailItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-base);
+}
+
+.libraryDetailItem:hover {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+    transform: translateY(-1px);
+}
+
+.libraryDetailIcon {
+    font-size: var(--text-lg);
+    margin-top: var(--space-1);
+    flex-shrink: 0;
+}
+
+.libraryDetailLabel {
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+    font-weight: var(--font-semibold);
+    display: block;
+    margin-bottom: var(--space-1);
+}
+
+.libraryDetailValue {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+    display: block;
+}
+
+/* ===== LOADING STATES ===== */
+.loadingSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.loadingSpinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--neutral-200);
+    border-top: 4px solid var(--primary-600);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+.loadingText {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+}
+
+/* ===== ERROR STATES ===== */
+.errorSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    flex-direction: column;
+    gap: var(--space-4);
+    text-align: center;
+}
+
+.errorIcon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--error-500), var(--error-600));
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-2xl);
+    color: var(--text-inverse);
+}
+
+.errorText {
+    font-size: var(--text-xl);
+    color: var(--error-600);
+    font-weight: var(--font-semibold);
+    margin: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .container {
+        padding: var(--space-4);
+    }
+    
+    .bookContent {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-6);
+    }
+    
+    .bookImage {
+        width: 240px;
+        height: 340px;
+    }
+    
+    .policiesGrid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    
+    .libraryDetails {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: var(--space-3);
+    }
+    
+    .headerSection {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+    
+    .pageTitle {
+        font-size: var(--text-2xl);
+    }
+    
+    .bookHeader {
+        flex-direction: column;
+        gap: var(--space-3);
+        align-items: flex-start;
+    }
+    
+    .bookTitle {
+        margin-right: 0;
+    }
+    
+    .bookContent {
+        padding: var(--space-4);
+    }
+    
+    .bookImage {
+        width: 200px;
+        height: 280px;
+    }
+    
+    .policiesGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    .policiesSection,
+    .libraryInfoSection {
+        padding: var(--space-6);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: var(--space-2);
+    }
+    
+    .pageTitle {
+        font-size: var(--text-xl);
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .bookContent {
+        padding: var(--space-3);
+    }
+    
+    .bookImage {
+        width: 160px;
+        height: 240px;
+    }
+    
+    .detailItem {
+        padding: var(--space-3);
+    }
+    
+    .borrowButton {
+        font-size: var(--text-base);
+        height: 48px;
+    }
+    
+    .policiesSection,
+    .libraryInfoSection {
+        padding: var(--space-4);
+    }
+    
+    .sectionTitle {
+        font-size: var(--text-xl);
+        flex-direction: column;
+        gap: var(--space-2);
+    }
 }
