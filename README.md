@@ -135,4 +135,98 @@ recommender.load_model('book_recommender_model.pkl')
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+# Book Data Processing and Database Import
+
+This project exports preprocessed book data from the hybrid recommender system, enriches it with Google Books API data, and imports it into a MySQL database.
+
+## Requirements
+
+- Python 3.6+
+- MySQL server
+- Required Python packages: `pandas`, `sqlalchemy`, `pymysql`, `requests`
+
+## Setup
+
+1. Install required packages:
+```
+pip install pandas sqlalchemy pymysql requests
+```
+
+2. Configure your MySQL connection in `init_database.py` and `import_books_into_database.py`:
+```python
+engine = create_engine('mysql+pymysql://root:12345678@localhost:3306/myLib')
+```
+
+3. Add your Google Books API key in `import_books_into_database.py`:
+```python
+GOOGLE_API_KEY = "YOUR_API_KEY"  # Replace with your actual Google API key
+```
+
+## Usage
+
+### Option 1: Run the complete process
+
+```
+python process_and_import_books.py
+```
+
+This will:
+1. Initialize the database and create the books table if needed
+2. Export preprocessed books from the recommender system to CSV file
+3. Import the books into the database with additional data from Google Books API
+
+### Option 2: Run individual steps
+
+Initialize the database:
+```
+python init_database.py
+```
+
+Export preprocessed books to CSV:
+```
+python export_preprocessed_books.py
+```
+
+Import books from CSV to database:
+```
+python import_books_into_database.py
+```
+
+## Files
+
+- `init_database.py`: Creates the myLib database and books table if they don't exist
+- `export_preprocessed_books.py`: Exports preprocessed books from the recommender system to CSV
+- `import_books_into_database.py`: Imports books from CSV to database with Google Books API data
+- `process_and_import_books.py`: Main script that runs all steps in sequence
+- `preprocessing_books.csv`: CSV file containing exported book data
+
+## Database Schema
+
+The books table has the following structure:
+
+```sql
+CREATE TABLE books (
+  book_id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  author VARCHAR(255),
+  publisher VARCHAR(255),
+  publication_year INT,
+  isbn VARCHAR(255) NOT NULL UNIQUE,
+  genre VARCHAR(255),
+  descriptions TEXT,
+  cover_image_url VARCHAR(255),
+  quantity INT NOT NULL,
+  available_quantity INT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  preview_link VARCHAR(255),
+  updated_at DATETIME(6)
+);
+```
+
+## Notes
+
+- The script generates random values for `quantity` (1-10) and `available_quantity` (0-quantity)
+- The Google Books API has rate limits. The script includes delays to avoid hitting these limits.
+- For books not found in the Google Books API, only basic information will be imported. 

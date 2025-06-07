@@ -3,8 +3,12 @@ import pandas as pd
 import os
 import traceback
 from hybrid_recommender import HybridBookRecommender
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Cho phép tất cả domain (cẩn thận trong production)
+
+
 
 # Initialize the recommender system
 MODEL_PATH = 'Recommender/book_recommender_model.pkl'
@@ -40,7 +44,7 @@ def search():
 def recommend():
     """Get recommendations for a book"""
     try:
-        book_title = request.args.get('book', '')
+        book_title = request.args.get('book_name', '')
         n = int(request.args.get('n', 10))
         
         if not book_title:

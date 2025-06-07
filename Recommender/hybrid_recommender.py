@@ -5,11 +5,22 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split as sklearn_train_test_split
 from scipy.optimize import minimize
 import re
 import pickle
 import os
+import time
+from collections import defaultdict
+from sentence_transformers import SentenceTransformer
+from surprise import Dataset, Reader, SVD, SVDpp, KNNBasic
+from surprise.model_selection import train_test_split as surprise_train_test_split
+
+try:
+    import faiss
+    FAISS_AVAILABLE = True
+except ImportError:
+    FAISS_AVAILABLE = False
 
 class HybridBookRecommender:
     def __init__(self, content_weight=0.3, collab_weight=0.5, popular_weight=0.2, optimize_weights=False):
@@ -44,6 +55,20 @@ class HybridBookRecommender:
         self.book_popularity_map = {}
         self.user_mean_ratings = {}
         self.global_mean_rating = 0
+        
+        # For caching
+        self.recommendation_cache = {}
+        self.cache_ttl = 3600  # 1 hour cache lifetime
+        
+        # For ANN
+        self.ann_index = None
+        self.ann_book_mapping = {}
+        self.book_ann_mapping = {}
+        
+        # For advanced models
+        self.svdpp_model = None
+        self.knn_model = None
+        self.semantic_model = None
         
     def load_data(self, books_path, ratings_path, users_path):
         """Load the book dataset files"""
@@ -616,122 +641,68 @@ class HybridBookRecommender:
         
     def predict_rating(self, user_id, book_title):
         """
-        Predict a rating for a user-book pair using collaborative filtering, content-based, 
-        and fallback approaches for cold-start cases.
-        
-        Args:
-            user_id: User ID
-            book_title: Book title
-            
-        Returns:
-            Predicted rating on a 1-10 scale
+        Predict a rating for a user-book pair using collaborative filtering, content-based,
+        and fallback approaches for cold-start cases. Ensures no direct leak from test data.
         """
-        # Check if we have data for this book and user
-        user_data = self.merged_df[self.merged_df['User-ID'] == user_id]
-        
-        # Check for direct rating (user has already rated this book)
-        direct_rating = user_data[user_data['Book-Title'] == book_title]
-        if not direct_rating.empty:
-            return direct_rating.iloc[0]['Book-Rating']
-        
-        # Cold-start handling for new users (less than threshold ratings)
-        if len(user_data) < self.cold_start_threshold:
-            # If new user, use book average or global average
+        # Use train_data for direct ratings only
+        if self.train_data is None:
+            raise ValueError("Train data not available. Run split_data() first.")
+
+        # Check for direct rating in training set to avoid test leakage
+        user_train = self.train_data[self.train_data['User-ID'] == user_id]
+        direct = user_train[user_train['Book-Title'] == book_title]
+        if not direct.empty:
+            return direct.iloc[0]['Book-Rating']
+
+        # Cold-start for new users (fewer than threshold in training)
+        if len(user_train) < self.cold_start_threshold:
+            # Fallback to book mean or global mean
             if book_title in self.popular_books.index:
                 return self.popular_books.loc[book_title, 'mean']
-            else:
-                return self.global_mean_rating
-        
-        # Get similar books the user has rated
-        user_ratings = user_data.sort_values('Book-Rating', ascending=False)
-        
-        if len(user_ratings) > 0:
-            # APPROACH 1: Use collaborative filtering with similar books the user has rated
-            rated_books = user_ratings[user_ratings['Book-Rating'] >= 7]['Book-Title'].tolist()
-            
-            if rated_books and book_title in self.item_similarity_matrix.index:
-                # For each highly rated book, get its similarity to our target book
-                similarities = []
-                ratings = []
-                
-                for rated_book in rated_books[:5]:  # Use up to 5 books for efficiency
-                    # Check in collaborative matrix
-                    if rated_book in self.item_similarity_matrix.columns:
-                        sim = self.item_similarity_matrix.loc[book_title, rated_book]
-                        user_rating = user_ratings[user_ratings['Book-Title'] == rated_book].iloc[0]['Book-Rating']
-                        
-                        # Only use significant similarities
-                        if sim > 0.1:  # Threshold for meaningful similarity
-                            similarities.append(sim)
-                            ratings.append(user_rating)
-                
-                # If we have similarities, compute weighted average
-                if similarities and len(similarities) >= 2:
-                    similarities = np.array(similarities)
-                    ratings = np.array(ratings)
-                    # Weighted average based on similarity
-                    weighted_rating = np.sum(similarities * ratings) / np.sum(similarities) if np.sum(similarities) > 0 else 0
-                    
-                    # Add user's mean rating bias if available
-                    if hasattr(self, 'user_means_map') and user_id in self.user_means_map:
-                        # Adjust prediction with user's rating tendency
-                        baseline = self.user_means_map[user_id]
-                        # Mix weighted prediction with baseline
-                        final_rating = 0.8 * weighted_rating + 0.2 * baseline
-                    else:
-                        final_rating = weighted_rating
-                    
-                    # Ensure rating is within explicit rating range (1-10)
-                    return max(1, min(10, final_rating))
-            
-            # APPROACH 2: Use hybrid recommendations position as a proxy for rating
-            seed_book = user_ratings.iloc[0]['Book-Title']
-            recommendations = self.get_hybrid_recommendations(seed_book, n=50)
-            
-            # If the book is in recommendations, estimate rating based on position
-            if book_title in recommendations:
-                position = recommendations.index(book_title)
-                position_ratio = position / len(recommendations)
-                
-                # Explicit rating range is 1-10, so map position to this range
-                # Higher positions (lower index) get higher ratings
-                rating = 10 - position_ratio * 9  # Map from 10 down to 1
-                
-                # Blend with user's average rating tendency
-                if hasattr(self, 'user_means_map') and user_id in self.user_means_map:
-                    user_mean = self.user_means_map[user_id]
-                    # Mix position-based rating with user's average
-                    blended_rating = 0.7 * rating + 0.3 * user_mean
-                    return max(1, min(10, blended_rating))
-                
-                return max(1, min(10, rating))
-            
-        # APPROACH 3: Fall back to baseline approaches
-        # Try to use a mix of user and book averages
-        user_mean = None
-        book_mean = None
-        
-        # Get user's mean rating if available
-        if hasattr(self, 'user_means_map') and user_id in self.user_means_map:
-            user_mean = self.user_means_map[user_id]
-        elif user_id in self.user_mean_ratings:
-            user_mean = self.user_mean_ratings[user_id]
-            
-        # Get book's mean rating if available
-        if book_title in self.popular_books.index:
-            book_mean = self.popular_books.loc[book_title, 'mean']
-            
-        # Combine available information with appropriate weights
-        if user_mean is not None and book_mean is not None:
-            # Blend user and book means
-            return 0.6 * user_mean + 0.4 * book_mean
-        elif book_mean is not None:
-            return book_mean
-        elif user_mean is not None:
-            return user_mean
-        else:
-            # Ultimate fallback is global average
             return self.global_mean_rating
+
+        # Collaborative filtering: weighted avg of similar books
+        rated_high = user_train[user_train['Book-Rating'] >= 7]['Book-Title'].tolist()
+        sims, rates = [], []
+        for rb in rated_high[:5]:
+            if book_title in self.item_similarity_matrix.index and rb in self.item_similarity_matrix.columns:
+                sim = self.item_similarity_matrix.at[book_title, rb]
+                if sim > 0.1:
+                    sims.append(sim)
+                    rates.append(user_train[user_train['Book-Title'] == rb]['Book-Rating'].iloc[0])
+        if len(sims) >= 2:
+            sims_arr, rates_arr = np.array(sims), np.array(rates)
+            wavg = sims_arr.dot(rates_arr) / sims_arr.sum()
+            baseline = self.user_means_map.get(user_id, np.mean(rates_arr))
+            pred = 0.8 * wavg + 0.2 * baseline
+            return min(10, max(1, pred))
+
+        # Hybrid position proxy if CF insufficient
+        top_seed = user_train.sort_values('Book-Rating', ascending=False)['Book-Title'].head(3).tolist()
+        recs = []
+        for sb in top_seed:
+            recs.extend(self.get_hybrid_recommendations(sb, n=50))
+        # Deduplicate and take position
+        unique_recs = list(dict.fromkeys(recs))
+        if book_title in unique_recs:
+            pos = unique_recs.index(book_title)
+            ratio = pos / len(unique_recs)
+            rating = 10 - ratio * 9
+            um = self.user_means_map.get(user_id, self.global_mean_rating)
+            blended = 0.7 * rating + 0.3 * um
+            return min(10, max(1, blended))
+
+        # Final fallback: blend user mean and book mean
+        um = self.user_means_map.get(user_id, self.user_mean_ratings.get(user_id, None))
+        bm = self.popular_books.loc[book_title, 'mean'] if book_title in self.popular_books.index else None
+        if um is not None and bm is not None:
+            return 0.6 * um + 0.4 * bm
+        if bm is not None:
+            return bm
+        if um is not None:
+            return um
+        return self.global_mean_rating
+
         
     def split_data(self, test_size=0.2, random_state=42, verbose=True):
         """
@@ -753,7 +724,7 @@ class HybridBookRecommender:
         ratings_data = ratings_data[ratings_data['Book-Rating'] > 0]
         
         # Split data
-        self.train_data, self.test_data = train_test_split(
+        self.train_data, self.test_data = sklearn_train_test_split(
             ratings_data, test_size=test_size, random_state=random_state
         )
         
@@ -809,6 +780,8 @@ class HybridBookRecommender:
         return self.train_data, self.test_data
         
     def evaluate_model(self, k=10, verbose=True):
+        skipped_predictions = 0
+        skipped_rankings = 0
         """Evaluate the model using various metrics"""
         if self.test_data is None:
             print("Error: No test data available. Run split_data() first.")
@@ -817,7 +790,7 @@ class HybridBookRecommender:
         # Prediction metrics
         test_users = self.test_data['User-ID'].unique()
         # Limit to a reasonable number of users for faster evaluation
-        max_test_users = min(100, len(test_users))
+        max_test_users = min(200, len(test_users))
         test_users = np.random.choice(test_users, max_test_users, replace=False)
         
         test_predictions = []
@@ -846,6 +819,7 @@ class HybridBookRecommender:
                     test_predictions.append(predicted)
                     test_actual.append(row['Book-Rating'])
                 except Exception as e:
+                    skipped_predictions += 1
                     # Skip problematic predictions but log the error
                     # print(f"Error predicting rating for user {user_id}, book {row['Book-Title']}: {str(e)}")
                     continue
@@ -853,7 +827,7 @@ class HybridBookRecommender:
             # For ranking metrics
             # Get top rated books for this user as relevant items (books rated 7+)
             relevant_books = user_test_data[user_test_data['Book-Rating'] >= 7]['Book-Title'].tolist()
-            
+
             if relevant_books:
                 # Get user's highly rated books from training data as seed for recommendations
                 user_train_data = self.train_data[self.train_data['User-ID'] == user_id]
@@ -876,6 +850,7 @@ class HybridBookRecommender:
                             recall_scores.append(recall)
                             f1_scores.append(f1)
                     except Exception as e:
+                        skipped_predictions += 1
                         # Skip problematic recommendations but log the error
                         # print(f"Error generating recommendations for user {user_id}: {str(e)}")
                         continue
@@ -894,7 +869,7 @@ class HybridBookRecommender:
         
         # Calculate and return metrics
         evaluation = {
-            'MAE': self.mae(test_predictions, test_actual)*1000000,
+            'MAE': self.mae(test_predictions, test_actual),
             'RMSE': self.rmse(test_predictions, test_actual),
             'Precision@K': np.mean(precision_scores),
             'Recall@K': np.mean(recall_scores),
@@ -911,83 +886,51 @@ class HybridBookRecommender:
             print(f"Based on {evaluation['NumPredictions']} predictions and {evaluation['NumRankingEvals']} ranking evaluations")
             
         print(f"Collected {len(test_predictions)} predictions for RMSE calculation")
+        print(f"Skipped predictions: {skipped_predictions}, skipped rankings: {skipped_rankings}")
+
         
         return evaluation
         
-    def optimize_model_weights(self):
-        """Optimize the weights for different recommendation components"""
+    def optimize_model_weights(self, lambda_rmse=0.1):
         if self.test_data is None or not self.optimize_weights:
             return
-            
-        print("Optimizing model weights...")
-        
-        # Keep track of the best weights and performance
-        best_weights = [self.content_weight, self.collab_weight, self.popular_weight]
-        best_performance = float('inf')  # Lower is better for our optimization objective
-        
-        # Define a more effective objective function that ensures weights actually change
-        def objective_function(weights):
-            # Normalize weights to sum to 1
-            weights = np.array(weights)
-            weights = weights / np.sum(weights)
-            
-            # Store original weights
-            original_weights = [self.content_weight, self.collab_weight, self.popular_weight]
-            
-            # Set new weights
-            self.content_weight = weights[0]
-            self.collab_weight = weights[1]
-            self.popular_weight = weights[2]
-            
-            # Skip evaluation if weights are almost identical to original
-            if np.allclose(weights, original_weights, rtol=1e-3, atol=1e-3):
-                # Add a penalty to encourage exploration of different weights
-                return 10.0  # High penalty value
-            
-            # Evaluate with these weights
-            eval_results = self.evaluate_model(verbose=False)
-            
-            # Objective: optimize a weighted combination of metrics
-            # We want to minimize RMSE and maximize F1@K
-            # Lower objective value is better
-            objective_value = eval_results['RMSE'] * 0.5 - eval_results['F1@K'] * 0.5
-                
-            return objective_value
 
-        # Try multiple optimization runs with different starting points
-        bounds = [(0.01, 0.99), (0.01, 0.99), (0.01, 0.99)]  # Ensure no weight is 0 or 1
-        constraint = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}
-        
-        # Try different starting points
-        starting_points = [
-            [0.33, 0.33, 0.34],  # Equal weights
-            [0.6, 0.3, 0.1],     # Content-heavy
-            [0.2, 0.7, 0.1],     # Collaborative-heavy
-            [0.1, 0.1, 0.8],     # Popularity-heavy
-            [self.content_weight, self.collab_weight, self.popular_weight]  # Current weights
+        print("Optimizing weights...")
+        best = (self.content_weight, self.collab_weight, self.popular_weight)
+        best_obj = float('inf')
+
+        def obj(w):
+            w = np.array(w) / np.sum(w)  # Chuẩn hóa tổng = 1
+            self.content_weight, self.collab_weight, self.popular_weight = w
+            res = self.evaluate_model(k=10, verbose=False)
+            if res['NumRankingEvals'] == 0:
+                return 1.0  # Nếu không đánh giá được thì trả về giá trị xấu
+            return -res['F1@K'] + lambda_rmse * res['RMSE']  # Kết hợp F1@K và RMSE
+
+        bounds = [(0.01, 0.99)] * 3  # Trọng số không bằng 0 hoặc 1 tuyệt đối
+        cons = {'type': 'eq', 'fun': lambda x: np.sum(x) - 1}  # Tổng trọng số = 1
+        starts = [
+            [0.33, 0.33, 0.34],
+            [0.6, 0.3, 0.1],
+            [0.3, 0.6, 0.1],
+            [0.1, 0.1, 0.8]
         ]
-        
-        for start_point in starting_points:
-            result = minimize(
-                objective_function, 
-                start_point,
-                bounds=bounds,
-                constraints=constraint,
-                method='SLSQP',
-                options={'maxiter': 50, 'ftol': 1e-6}
+
+        for sp in starts:
+            out = minimize(
+                obj, sp, bounds=bounds, constraints=cons,
+                method='SLSQP', options={'maxiter': 50}
             )
-            
-            # Check if this result is better than our current best
-            if result.success and result.fun < best_performance:
-                best_performance = result.fun
-                best_weights = result.x / np.sum(result.x)  # Normalize
-        
-        # Apply the best weights found
-        self.content_weight = best_weights[0]
-        self.collab_weight = best_weights[1]
-        self.popular_weight = best_weights[2]
-        
-        print(f"Optimized weights: Content={self.content_weight:.2f}, Collaborative={self.collab_weight:.2f}, Popularity={self.popular_weight:.2f}")
+            if out.success and out.fun < best_obj:
+                best_obj = out.fun
+                w = out.x / np.sum(out.x)
+                best = tuple(w)
+
+        self.content_weight, self.collab_weight, self.popular_weight = best
+        print(f"Optimized weights: C={best[0]:.2f}, L={best[1]:.2f}, P={best[2]:.2f}")
+
+
+
         
     def get_book_details(self, book_titles):
         """Get details for a list of book titles"""
@@ -1079,6 +1022,575 @@ class HybridBookRecommender:
             return 0
         return 2 * (precision * recall) / (precision + recall)
 
+    def build_semantic_content_matrix(self, verbose=True):
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        titles = self.merged_df['Book-Title'].drop_duplicates().tolist()
+        embeddings = model.encode(titles, show_progress_bar=verbose)
+        similarity_matrix = cosine_similarity(embeddings)
+        self.semantic_content_matrix = pd.DataFrame(
+            similarity_matrix, index=titles, columns=titles
+        )
+
+    def build_surprise_collab_model(self):
+        reader = Reader(rating_scale=(1, 10))
+        data = Dataset.load_from_df(self.merged_df[['User-ID', 'Book-Title', 'Book-Rating']], reader)
+        trainset, _ = surprise_train_test_split(data, test_size=0.2)
+        algo = SVD()
+        algo.fit(trainset)
+        self.surprise_model = algo
+
+    def build_enhanced_content_model(self, verbose=True):
+        """
+        Build an enhanced content-based model using sentence transformers for better semantic representation.
+        This produces higher quality content-based recommendations than the TF-IDF approach.
+        """
+        if verbose:
+            print("Building enhanced content-based model...")
+        
+        # Create book content features
+        books_content = self.merged_df.drop_duplicates('Book-Title')[
+            ['Book-Title', 'Book-Author', 'Publisher', 'Year-Of-Publication']
+        ]
+        
+        # Create rich text representation for each book
+        books_content['content'] = books_content.apply(
+            lambda x: f"Title: {x['Book-Title']} Author: {x['Book-Author']} " + 
+                     f"Publisher: {x['Publisher']} Year: {str(x['Year-Of-Publication'])}",
+            axis=1
+        )
+        
+        # Use sentence transformer for better semantic representation
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.semantic_model = model
+        
+        # Process in batches to avoid memory issues
+        batch_size = 128
+        all_embeddings = []
+        titles = []
+        
+        if verbose:
+            print(f"Generating embeddings for {len(books_content)} books in batches of {batch_size}...")
+        
+        for i in range(0, len(books_content), batch_size):
+            batch = books_content.iloc[i:i+batch_size]
+            batch_embeddings = model.encode(batch['content'].tolist(), show_progress_bar=False)
+            all_embeddings.append(batch_embeddings)
+            titles.extend(batch['Book-Title'].tolist())
+            if verbose and i % 500 == 0 and i > 0:
+                print(f"  - Processed {i}/{len(books_content)} books")
+        
+        # Combine all embeddings
+        embeddings = np.vstack(all_embeddings)
+        
+        if verbose:
+            print("Computing similarity matrix...")
+            
+        # Calculate cosine similarity efficiently
+        similarity_matrix = cosine_similarity(embeddings)
+        
+        # Create DataFrame from similarity matrix
+        self.book_content_matrix = pd.DataFrame(
+            similarity_matrix,
+            index=titles,
+            columns=titles
+        )
+        
+        if verbose:
+            print(f"Enhanced content-based model built with {len(titles)} books")
+            # Show sample similarity for a random book
+            if len(titles) > 0:
+                sample_book = np.random.choice(titles)
+                similar_books = self.book_content_matrix[sample_book].sort_values(ascending=False)[1:6]
+                print(f"\nSample similar books to '{sample_book}':")
+                for book, score in similar_books.items():
+                    print(f"  - {book} (similarity: {score:.2f})")
+        
+        return self.book_content_matrix
+        
+    def build_ann_index(self, verbose=True):
+        """
+        Build Approximate Nearest Neighbors index for faster similarity search.
+        This dramatically speeds up recommendation retrieval for large datasets.
+        """
+        if not FAISS_AVAILABLE:
+            if verbose:
+                print("FAISS not available. Install with: pip install faiss-cpu or faiss-gpu")
+            return False
+            
+        if verbose:
+            print("Building ANN index for faster recommendations...")
+            
+        # Get embeddings from sentence transformer
+        if self.semantic_model is None:
+            model = SentenceTransformer('all-MiniLM-L6-v2')
+            self.semantic_model = model
+        else:
+            model = self.semantic_model
+            
+        books = self.merged_df['Book-Title'].drop_duplicates().tolist()
+        
+        # Process in batches
+        batch_size = 128
+        all_embeddings = []
+        
+        for i in range(0, len(books), batch_size):
+            batch = books[i:i+batch_size]
+            emb = model.encode(batch, show_progress_bar=False)
+            all_embeddings.append(emb)
+            if verbose and i % 500 == 0 and i > 0:
+                print(f"  - Encoded {i}/{len(books)} books")
+            
+        embeddings = np.vstack(all_embeddings)
+        
+        # Normalize vectors for cosine similarity
+        faiss.normalize_L2(embeddings)
+        
+        # Build FAISS index
+        d = embeddings.shape[1]  # embedding dimension
+        index = faiss.IndexFlatIP(d)  # inner product = cosine similarity for normalized vectors
+        index.add(embeddings)
+        
+        # Store index and book mapping
+        self.ann_index = index
+        self.ann_book_mapping = {i: book for i, book in enumerate(books)}
+        self.book_ann_mapping = {book: i for i, book in enumerate(books)}
+        
+        if verbose:
+            print(f"ANN index built with {len(books)} books")
+        
+        return True
+        
+    def build_advanced_collaborative_models(self, verbose=True):
+        """
+        Build advanced collaborative filtering models using Surprise library.
+        This includes SVD++, which considers implicit feedback, and KNN for item-based filtering.
+        """
+        if verbose:
+            print("Building advanced collaborative filtering models...")
+        
+        # Prepare data for Surprise
+        reader = Reader(rating_scale=(1, 10))
+        data = Dataset.load_from_df(
+            self.merged_df[['User-ID', 'Book-Title', 'Book-Rating']], 
+            reader
+        )
+        
+        # Split into train/test
+        trainset, _ = surprise_train_test_split(data, test_size=0.2)
+        
+        # Build SVD++ model
+        if verbose:
+            print("  - Training SVD++ model...")
+        self.svdpp_model = SVDpp(
+            n_factors=50,
+            n_epochs=20,
+            lr_all=0.005,
+            reg_all=0.02,
+            random_state=42
+        )
+        self.svdpp_model.fit(trainset)
+        
+        # Build KNN model
+        if verbose:
+            print("  - Training KNN model...")
+        self.knn_model = KNNBasic(
+            k=40,
+            min_k=2,
+            sim_options={'name': 'pearson_baseline', 'user_based': False},
+            random_state=42
+        )
+        self.knn_model.fit(trainset)
+        
+        if verbose:
+            print("Advanced collaborative models built successfully")
+        
+        return self.svdpp_model, self.knn_model
+        
+    def get_optimized_hybrid_recommendations(self, book_title, n=10, diversity_factor=0.3):
+        """
+        Get optimized hybrid recommendations with better performance and diversity.
+        
+        Args:
+            book_title: Title of the book to get recommendations for
+            n: Number of recommendations to return
+            diversity_factor: Weight given to diversity (0-1)
+            
+        Returns:
+            List of recommended book titles
+        """
+        # Check if we have a valid cache entry
+        cache_key = f"{book_title}_{n}_{diversity_factor}"
+        if cache_key in self.recommendation_cache and time.time() - self.recommendation_cache[cache_key]['timestamp'] < self.cache_ttl:
+            return self.recommendation_cache[cache_key]['recommendations']
+        
+        # Check if ANN index is available for faster retrieval
+        if FAISS_AVAILABLE and hasattr(self, 'ann_index') and self.ann_index is not None and book_title in self.book_ann_mapping:
+            # Use ANN for fast retrieval
+            book_idx = self.book_ann_mapping[book_title]
+            book_vector = np.zeros((1, self.ann_index.d), dtype=np.float32)
+            
+            # Get the book's embedding vector
+            if hasattr(self, 'semantic_model') and self.semantic_model is not None:
+                # Generate embedding on the fly
+                book_vector = self.semantic_model.encode([book_title], show_progress_bar=False)
+                # Normalize for cosine similarity
+                faiss.normalize_L2(book_vector)
+            else:
+                # Use the index directly if we don't have the model
+                book_vector[0, book_idx] = 1
+            
+            # Get more recommendations than needed to ensure diversity
+            k = min(n*5, self.ann_index.ntotal)
+            D, I = self.ann_index.search(book_vector, k)
+            
+            # Convert indices back to book titles
+            ann_candidates = [self.ann_book_mapping[idx] for idx in I[0] if idx != book_idx]
+            
+            # Get collaborative recommendations
+            collab_recs = self.get_collaborative_recommendations(book_title, n=n*2)
+            collab_candidates = collab_recs.index.tolist() if not collab_recs.empty else []
+            
+            # Get popularity scores
+            pop_recs = self.get_popular_recommendations(n=n*2)
+            pop_candidates = pop_recs.index.tolist()
+            
+            # Combine all candidates
+            all_candidates = list(dict.fromkeys(ann_candidates + collab_candidates + pop_candidates))
+            if book_title in all_candidates:
+                all_candidates.remove(book_title)
+                
+            # Get popularity scores for these candidates
+            pop_scores = {}
+            for book in all_candidates:
+                if book in self.popular_books.index:
+                    pop_scores[book] = self.popular_books.loc[book, 'score']
+                else:
+                    pop_scores[book] = 0
+                    
+            # Normalize popularity scores
+            max_pop = max(pop_scores.values()) if pop_scores else 1
+            norm_pop_scores = {k: v/max_pop for k, v in pop_scores.items()}
+            
+            # Calculate content similarity scores
+            content_scores = {}
+            for book in all_candidates:
+                if book in self.book_content_matrix.index and book_title in self.book_content_matrix.columns:
+                    content_scores[book] = self.book_content_matrix.loc[book, book_title]
+                else:
+                    content_scores[book] = 0
+            
+            # Normalize content scores
+            max_content = max(content_scores.values()) if content_scores else 1
+            norm_content_scores = {k: v/max_content for k, v in content_scores.items()}
+            
+            # Calculate collaborative scores
+            collab_scores = {}
+            for book in all_candidates:
+                if book in collab_recs:
+                    collab_scores[book] = collab_recs[book]
+                else:
+                    collab_scores[book] = 0
+                    
+            # Normalize collaborative scores
+            max_collab = max(collab_scores.values()) if collab_scores else 1
+            norm_collab_scores = {k: v/max_collab for k, v in collab_scores.items()}
+            
+            # Calculate final scores with diversity
+            final_scores = {}
+            selected_books = []
+            
+            # First, calculate initial scores
+            for book in all_candidates:
+                content_score = norm_content_scores.get(book, 0)
+                collab_score = norm_collab_scores.get(book, 0)
+                pop_score = norm_pop_scores.get(book, 0)
+                
+                # Weighted combination
+                final_scores[book] = (
+                    self.content_weight * content_score + 
+                    self.collab_weight * collab_score + 
+                    self.popular_weight * pop_score
+                )
+            
+            # Iteratively select books with diversity consideration
+            remaining_candidates = set(all_candidates)
+            
+            while len(selected_books) < n and remaining_candidates:
+                # Select the highest scoring book
+                best_book = max(remaining_candidates, key=lambda x: final_scores.get(x, 0))
+                selected_books.append(best_book)
+                remaining_candidates.remove(best_book)
+                
+                # Penalize similar books to promote diversity
+                for book in remaining_candidates:
+                    if best_book in self.book_content_matrix.index and book in self.book_content_matrix.columns:
+                        similarity = self.book_content_matrix.loc[best_book, book]
+                        # Reduce score based on similarity to already selected books
+                        final_scores[book] *= (1 - diversity_factor * similarity)
+            
+            # Cache the results
+            self.recommendation_cache[cache_key] = {
+                'recommendations': selected_books,
+                'timestamp': time.time()
+            }
+            
+            return selected_books
+        else:
+            # Fall back to original method with diversity enhancement
+            recommendations = self.get_hybrid_recommendations(book_title, n=n*2)
+            
+            # Apply diversity filter
+            selected_books = []
+            remaining_candidates = recommendations.copy() if recommendations else []
+            
+            while len(selected_books) < n and remaining_candidates:
+                # Add the next book
+                next_book = remaining_candidates.pop(0)
+                selected_books.append(next_book)
+                
+                # Filter remaining books based on diversity
+                if len(remaining_candidates) > 0 and self.book_content_matrix is not None:
+                    # Calculate average similarity to already selected books
+                    similarity_scores = []
+                    for candidate in remaining_candidates:
+                        avg_sim = 0
+                        count = 0
+                        for selected in selected_books:
+                            if (selected in self.book_content_matrix.index and 
+                                candidate in self.book_content_matrix.columns):
+                                avg_sim += self.book_content_matrix.loc[selected, candidate]
+                                count += 1
+                        avg_sim = avg_sim / count if count > 0 else 0
+                        similarity_scores.append((candidate, avg_sim))
+                    
+                    # Sort by similarity (ascending) to prioritize diverse books
+                    similarity_scores.sort(key=lambda x: x[1])
+                    
+                    # Reorder remaining candidates to promote diversity
+                    remaining_candidates = [book for book, _ in similarity_scores]
+            
+            # Cache the results
+            self.recommendation_cache[cache_key] = {
+                'recommendations': selected_books,
+                'timestamp': time.time()
+            }
+            
+            return selected_books
+            
+    def predict_rating_advanced(self, user_id, book_title):
+        """
+        Predict a rating using advanced models and ensemble techniques.
+        This improves prediction accuracy by combining multiple approaches.
+        """
+        # Use train_data for direct ratings only
+        if self.train_data is None:
+            raise ValueError("Train data not available. Run split_data() first.")
+
+        # Check for direct rating in training set to avoid test leakage
+        user_train = self.train_data[self.train_data['User-ID'] == user_id]
+        direct = user_train[user_train['Book-Title'] == book_title]
+        if not direct.empty:
+            return direct.iloc[0]['Book-Rating']
+
+        # Initialize prediction components
+        predictions = []
+        weights = []
+        
+        # Try SVD++ prediction if available
+        if hasattr(self, 'svdpp_model') and self.svdpp_model is not None:
+            try:
+                svdpp_pred = self.svdpp_model.predict(user_id, book_title).est
+                predictions.append(svdpp_pred)
+                weights.append(0.4)  # Higher weight for SVD++
+            except:
+                pass
+                
+        # Try KNN prediction if available
+        if hasattr(self, 'knn_model') and self.knn_model is not None:
+            try:
+                knn_pred = self.knn_model.predict(user_id, book_title).est
+                predictions.append(knn_pred)
+                weights.append(0.3)  # Medium weight for KNN
+            except:
+                pass
+                
+        # Use original collaborative filtering approach
+        try:
+            # Collaborative filtering: weighted avg of similar books
+            rated_high = user_train[user_train['Book-Rating'] >= 7]['Book-Title'].tolist()
+            sims, rates = [], []
+            for rb in rated_high[:5]:
+                if book_title in self.item_similarity_matrix.index and rb in self.item_similarity_matrix.columns:
+                    sim = self.item_similarity_matrix.at[book_title, rb]
+                    if sim > 0.1:
+                        sims.append(sim)
+                        rates.append(user_train[user_train['Book-Title'] == rb]['Book-Rating'].iloc[0])
+            
+            if len(sims) >= 2:
+                sims_arr, rates_arr = np.array(sims), np.array(rates)
+                wavg = sims_arr.dot(rates_arr) / sims_arr.sum()
+                baseline = self.user_means_map.get(user_id, np.mean(rates_arr))
+                cf_pred = 0.8 * wavg + 0.2 * baseline
+                predictions.append(cf_pred)
+                weights.append(0.3)  # Medium weight for CF
+        except:
+            pass
+            
+        # If we have any predictions, compute weighted average
+        if predictions:
+            # Normalize weights
+            weights = np.array(weights) / sum(weights)
+            final_pred = sum(p * w for p, w in zip(predictions, weights))
+            return min(10, max(1, final_pred))
+            
+        # Fall back to original method if no advanced predictions
+        return self.predict_rating(user_id, book_title)
+        
+    def diversity_score(self, recommendations):
+        """Calculate diversity score of recommendations"""
+        if len(recommendations) <= 1:
+            return 0.0
+            
+        # Get pairwise similarities
+        similarity_sum = 0
+        count = 0
+        
+        for i in range(len(recommendations)):
+            for j in range(i+1, len(recommendations)):
+                book1 = recommendations[i]
+                book2 = recommendations[j]
+                
+                if (book1 in self.book_content_matrix.index and 
+                    book2 in self.book_content_matrix.columns):
+                    sim = self.book_content_matrix.at[book1, book2]
+                    similarity_sum += sim
+                    count += 1
+        
+        # Average similarity (lower is more diverse)
+        avg_similarity = similarity_sum / count if count > 0 else 0
+        
+        # Convert to diversity score (higher is more diverse)
+        return 1.0 - avg_similarity
+        
+    def optimize_weights_bayesian(self, n_iterations=30):
+        """Optimize weights using Bayesian optimization"""
+        try:
+            from skopt import gp_minimize
+            from skopt.space import Real
+            
+            print("Optimizing weights with Bayesian optimization...")
+            
+            # Define the objective function to minimize
+            def objective(weights):
+                content_w, collab_w, popular_w = weights
+                # Normalize weights to sum to 1
+                total = sum(weights)
+                self.content_weight = content_w / total
+                self.collab_weight = collab_w / total
+                self.popular_weight = popular_w / total
+                
+                # Evaluate model
+                result = self.evaluate_model(k=10, verbose=False)
+                
+                # Return negative F1 (since we're minimizing)
+                return -result['F1@K'] + 0.1 * result['RMSE']
+            
+            # Define the search space
+            space = [
+                Real(0.1, 0.9, name='content_weight'),
+                Real(0.1, 0.9, name='collab_weight'),
+                Real(0.1, 0.9, name='popular_weight')
+            ]
+            
+            # Run Bayesian optimization
+            result = gp_minimize(
+                objective,
+                space,
+                n_calls=n_iterations,
+                random_state=42,
+                verbose=True
+            )
+            
+            # Set the optimal weights
+            best_weights = result.x
+            total = sum(best_weights)
+            self.content_weight = best_weights[0] / total
+            self.collab_weight = best_weights[1] / total
+            self.popular_weight = best_weights[2] / total
+            
+            print(f"Optimized weights: C={self.content_weight:.2f}, L={self.collab_weight:.2f}, P={self.popular_weight:.2f}")
+            
+            return result
+        except ImportError:
+            print("scikit-optimize not available. Install with: pip install scikit-optimize")
+            # Fall back to original optimization
+            return self.optimize_model_weights()
+            
+    def evaluate_enhanced_model(self, k=10, verbose=True):
+        """
+        Evaluate the model with additional metrics for diversity and coverage.
+        This provides a more comprehensive assessment of recommendation quality.
+        """
+        if self.test_data is None:
+            print("Error: No test data available. Run split_data() first.")
+            return
+            
+        # Standard evaluation
+        standard_metrics = self.evaluate_model(k=k, verbose=False)
+        
+        # Additional metrics
+        diversity_scores = []
+        coverage = set()
+        all_books = set(self.merged_df['Book-Title'].unique())
+        
+        # Sample users for evaluation
+        test_users = self.test_data['User-ID'].unique()
+        max_test_users = min(100, len(test_users))
+        test_users = np.random.choice(test_users, max_test_users, replace=False)
+        
+        for user_idx, user_id in enumerate(test_users):
+            if verbose and user_idx % 10 == 0:
+                print(f"Evaluating enhanced metrics for user {user_idx+1}/{len(test_users)}...")
+                
+            # Get user's highly rated books from training data as seed for recommendations
+            user_train_data = self.train_data[self.train_data['User-ID'] == user_id]
+            if len(user_train_data) > 0:
+                try:
+                    # Sort by rating to get the highest rated book
+                    seed_book = user_train_data.sort_values('Book-Rating', ascending=False).iloc[0]['Book-Title']
+                    
+                    # Get optimized recommendations
+                    recommendations = self.get_optimized_hybrid_recommendations(seed_book, n=k)
+                    
+                    # Check if we have valid recommendations
+                    if recommendations and len(recommendations) > 0:
+                        # Calculate diversity
+                        div_score = self.diversity_score(recommendations)
+                        diversity_scores.append(div_score)
+                        
+                        # Update coverage
+                        coverage.update(recommendations)
+                except Exception as e:
+                    continue
+        
+        # Calculate average diversity and coverage
+        avg_diversity = np.mean(diversity_scores) if diversity_scores else 0
+        coverage_ratio = len(coverage) / len(all_books) if all_books else 0
+        
+        # Combine metrics
+        enhanced_metrics = standard_metrics.copy()
+        enhanced_metrics['Diversity'] = avg_diversity
+        enhanced_metrics['Coverage'] = coverage_ratio
+        
+        if verbose:
+            print(f"\nEnhanced Model Evaluation with weights C:{self.content_weight:.2f} L:{self.collab_weight:.2f} P:{self.popular_weight:.2f}:")
+            for metric, value in enhanced_metrics.items():
+                if metric not in ['NumPredictions', 'NumRankingEvals']:
+                    print(f"{metric}: {value:.4f}")
+            print(f"Based on {enhanced_metrics['NumPredictions']} predictions and {enhanced_metrics['NumRankingEvals']} ranking evaluations")
+        
+        return enhanced_metrics
+
 # Usage example
 if __name__ == "__main__":
     try:
@@ -1101,10 +1613,39 @@ if __name__ == "__main__":
         print("\n===== PREPROCESSING DATA =====")
         # Detailed preprocessing with verbose output
         processed_data = recommender.preprocess_data(
-            min_book_ratings=5,   # Include books with at least 15 ratings
+            min_book_ratings=10,   # Include books with at least 15 ratings
             min_user_ratings=3,    # Include users with at least 3 ratings
             verbose=True           # Show detailed preprocessing steps
         )
+
+        print("\n===== BUILDING SEMANTIC CONTENT MATRIX =====")
+        # Build semantic content matrix using sentence embeddings
+        recommender.build_semantic_content_matrix(verbose=True)
+        
+        print("\n===== BUILDING SURPRISE COLLABORATIVE MODEL =====")
+        # Build collaborative filtering model using Surprise library
+        recommender.build_surprise_collab_model()
+        
+        # Example: Get semantic recommendations for a book
+        example_book = "The Da Vinci Code"
+        if example_book in recommender.semantic_content_matrix.index:
+            print(f"\nSemantic recommendations for '{example_book}':")
+            semantic_scores = recommender.semantic_content_matrix[example_book].sort_values(ascending=False)[1:6]
+            for i, (book, score) in enumerate(semantic_scores.items(), 1):
+                print(f"{i}. {book} (similarity: {score:.2f})")
+        
+        # Example: Get predictions from Surprise model
+        print("\nExample predictions from Surprise model:")
+        # Get a sample user and book
+        sample_user = recommender.merged_df['User-ID'].iloc[0]
+        sample_book = recommender.merged_df['Book-Title'].iloc[0]
+        try:
+            prediction = recommender.surprise_model.predict(sample_user, sample_book)
+            print(f"Predicted rating for user {sample_user} and book '{sample_book}': {prediction.est:.2f}")
+        except Exception as e:
+            print(f"Could not make prediction: {str(e)}")
+        
+        # Continue with the rest of the example...
         
         print("\n===== SPLITTING DATA FOR EVALUATION =====")
         train_data, test_data = recommender.split_data(test_size=0.2, random_state=42, verbose=True)
@@ -1116,7 +1657,7 @@ if __name__ == "__main__":
         
         print("\n===== BUILDING COLLABORATIVE FILTERING MODEL =====")
         # Build collaborative filtering model with improved techniques
-        recommender.build_collaborative_model(n_components=50, verbose=True)
+        recommender.build_collaborative_model(n_components=100, verbose=True)
         
         print("\n===== EVALUATING DIFFERENT WEIGHT CONFIGURATIONS =====")
         # Try different weight configurations to see their impact

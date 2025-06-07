@@ -6,7 +6,7 @@ import pandas as pd
 import time
 
 # Tạo kết nối đến cơ sở dữ liệu (thay đổi thông tin này theo cấu hình của bạn)
-engine = create_engine('mysql+pymysql://root:12345678@localhost:3306/lib1')
+engine = create_engine('mysql+pymysql://root:12345678@localhost:3306/myLib')
 # Đọc file CSV đã chỉnh sửa
 books_to_import_df = pd.read_csv('/Users/Cecilia/python/data/books_to_export2.csv')
 

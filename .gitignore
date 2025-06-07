@@ -25,6 +25,9 @@ ENV/
 env/
 .venv/
 venv.bak/
+# Môi trường ảo cụ thể
+myenv/
+
 
 # IDEs and editors
 .idea/

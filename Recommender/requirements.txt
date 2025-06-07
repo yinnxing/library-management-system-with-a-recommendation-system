@@ -1,0 +1,24 @@
+# Core dependencies (required)
+pandas>=1.3.0
+numpy>=1.21.0
+scikit-learn>=1.0.0
+scipy>=1.7.0
+
+# Optional dependencies for enhanced features
+# Uncomment the ones you want to use
+
+# For semantic embeddings and advanced content-based filtering
+# sentence-transformers>=2.0.0
+
+# For advanced collaborative filtering algorithms
+# scikit-surprise>=1.1.0
+
+# For fast approximate nearest neighbor search
+# faiss-cpu>=1.7.0  # Use faiss-gpu for GPU acceleration
+
+# For Bayesian optimization of hyperparameters
+# scikit-optimize>=0.9.0
+
+# For development and testing
+# pytest>=6.0.0
+# pytest-cov>=2.0.0 

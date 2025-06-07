@@ -108,7 +108,7 @@ for index, row in books_df.iterrows():
 books_to_export_df = pd.DataFrame(book_data_list)
 
 # Xuất dữ liệu ra file CSV (để bạn có thể sửa thủ công)
-export_file_path = '/Users/Cecilia/python/data/books_to_export2.csv'
+export_file_path = '/Users/Cecilia/python/data/books_to_export.csv'
 books_to_export_df.to_csv(export_file_path, index=False)
 
 print(f"Dữ liệu đã được xuất vào file {export_file_path}. Bạn có thể chỉnh sửa thủ công và nhập lại vào cơ sở dữ liệu.")
