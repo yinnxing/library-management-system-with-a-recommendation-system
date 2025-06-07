@@ -1,6 +1,8 @@
 package com.library.booksystem.controller;
 
 
+import com.library.booksystem.dto.request.ChangePasswordRequest;
+import com.library.booksystem.dto.request.UpdateProfileRequest;
 import com.library.booksystem.dto.request.UserRequest;
 import com.library.booksystem.dto.response.ApiResponse;
 import com.library.booksystem.dto.response.UserResponse;
@@ -46,6 +48,18 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/profile")
+    ApiResponse<UserResponse> updateProfile(@RequestBody @Valid UpdateProfileRequest request){
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateProfile(request))
+                .build();
+    }
 
-
+    @PutMapping("/change-password")
+    ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request){
+        userService.changePassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Password changed successfully")
+                .build();
+    }
 }

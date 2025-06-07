@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Getter
 @Setter
@@ -33,6 +34,14 @@ public class Transaction {
 
     private LocalDateTime dueDate;
     private LocalDateTime returnDate;
+    
+    // Pickup deadline for PENDING transactions (3 days from borrow_date)
+    private LocalDateTime pickupDeadline;
+    
+    // Overdue fee in VND
+    @Column(precision = 10, scale = 2)
+    private BigDecimal overdueFee = BigDecimal.ZERO;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private TransactionStatus status = TransactionStatus.PENDING;

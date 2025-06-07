@@ -1,5 +1,7 @@
-package com.library.booksystem.dto.response;
+package com.library.booksystem.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,11 +14,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserResponse {
-    String userId;
+public class UpdateProfileRequest {
+    @Size(min = 4, message = "USERNAME_INVALID")
     String username;
+    
+    @Email(message = "EMAIL_INVALID")
     String email;
-    String role;
+    
     LocalDate dob;
+    
     String gender;
-}
+} 

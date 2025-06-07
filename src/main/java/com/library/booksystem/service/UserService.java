@@ -1,5 +1,7 @@
 package com.library.booksystem.service;
 
+import com.library.booksystem.dto.request.ChangePasswordRequest;
+import com.library.booksystem.dto.request.UpdateProfileRequest;
 import com.library.booksystem.dto.request.UserRequest;
 import com.library.booksystem.dto.response.UserResponse;
 import com.library.booksystem.enums.Role;
@@ -52,10 +54,51 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public UserResponse updateProfile(UpdateProfileRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+        );
+        
+        // Check if username is already taken by another user
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            }
+        }
+        
+        // Check if email is already taken by another user
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            }
+        }
+        
+        userMapper.updateUserFromRequest(request, user);
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
 
-
-
-
-
-
+    public void changePassword(ChangePasswordRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+        );
+        
+        // Verify current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        
+        // Check if new password and confirm password match
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
 }

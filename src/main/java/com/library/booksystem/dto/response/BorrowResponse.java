@@ -3,6 +3,8 @@ package com.library.booksystem.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +14,9 @@ public class BorrowResponse {
     String userId;
     Integer bookId;
     String transactionId;
-    private String expiryDate;
-    private String status;
+    String bookTitle;
+    LocalDateTime borrowDate;
+    LocalDateTime pickupDeadline;
+    String status;
+    String message;
 }
