@@ -166,7 +166,26 @@ Let me know if you'd like this formatted into a blog-ready Markdown file, added 
 
 
 
+🔧 Sources
+Spotify Engineering Blog – Cost Insights Plugin
+“New Cost Insights plugin: The engineer’s solution to taming cloud costs” (October 22, 2020)
+➤ https://backstage.io/blog/2020/10/22/cost-insights-plugin/
 
+RedMonk – Shifting cost optimisation left
+– Trích: “Early experiences with Cost Insights allowed Spotify to fund the equivalent of 25 teams…”
+➤ https://redmonk.com/jgovernor/2021/04/28/shifting-cost-optimisation-left-spotify-backstage-cost-insights/
+
+Spotify Engineering – Managing Clouds from the Ground Up
+– Giới thiệu Cost Insights và mô hình squad độc lập
+➤ https://engineering.atspotify.com/2020/09/managing-clouds-from-the-ground-up-cost-engineering-at-spotify
+
+Roadie.io Blog – Backstage and Cost Insights
+– Mô tả cách thức và triết lý “shifting cost awareness left” + trích lời Janisa Anandamohan
+➤ https://roadie.io/blog/backstage-and-cost-insights-shifting-cloud-costs-left/
+
+Dev.to – Cloud cost reduction case studies
+– Nêu kết quả tiết kiệm chi phí nhờ Cost Insights và Our Cookbook, kèm ví dụ tiết kiệm hàng triệu đô
+➤ https://dev.to/castai/zoom-spotify-and-others-slashed-their-cloud-costs-by-millions-how-did-they-do-it-38b
 
 
 
