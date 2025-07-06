@@ -69,125 +69,23 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
-🎧 FinOps at Spotify: From Cloud Cost Spikes to Engineering Ownership
-Spotify is a prime example of how a fast-scaling company can integrate FinOps practices deeply into its engineering culture—transforming rising cloud costs into measurable business efficiency. Here's a breakdown of their approach and outcomes.
+This week, I continued attending training sessions with my peers and also joined additional sessions focused on Quality Engineering. I completed the basic ISTQB Foundation course on Udemy, which gave me a better grasp of testing fundamentals. I also had a conversation with Mr. Pinky and learned that I’ll soon join an on-the-job training team. It feels like things are slowly coming together.
 
-🔍 The Problem
-Scaling on the cloud with fragmented ownership
-Spotify relies entirely on Google Cloud Platform (GCP) to support over 299 million users globally. With its squad-based engineering structure, each team operates independently—leading to decentralized cloud spend and limited financial oversight.
+One thing that didn’t go well was my time management. Although I made progress in QE, I couldn’t arrange time to start the AWS course as planned. Some technical sessions, like the Kafka exercise, were also challenging, and I struggled to fully keep up with them.
 
-Lack of real-time visibility
-Traditional cloud billing didn’t provide squad-level insights. Teams couldn’t easily answer “who is spending what” or “what are we getting in return,” making optimization difficult.
+I’m proud that I completed the core lessons in the ISTQB Foundation course. It wasn’t easy to balance it with other sessions, but I stayed committed. Finishing it gave me more clarity and confidence to move forward with my QE learning.
 
-Escalating costs without accountability
-As growth accelerated, engineering teams spun up resources quickly. Without guardrails or awareness, cloud costs increased rapidly without direct responsibility tied to those driving the spend.
+This week, I learned that good time management is just as important as technical skills. Without a clear plan, it's easy to fall behind or miss learning opportunities — like I did with the AWS course. I realized I need to be more proactive in setting daily and weekly learning goals.
 
-“The default state of cloud costs is chaos unless made visible and actionable.” – Spotify Engineering
+My goals for next week are to start the AWS course, prepare for the meet-and-greet with the on-the-job training team.
 
-🛠 FinOps Practices Applied
-🎛 1. Cost Insights Plugin for Backstage
-Spotify built a custom plugin called Cost Insights, embedded into their internal developer portal (Backstage).
+My current obstacle is maintaining focus while managing multiple learning tracks. It’s sometimes hard to switch between training, self-study, and preparation for future tasks. I need to stay disciplined and avoid distractions to make better use of my time.
 
-It visualizes cloud spend per team, product, and service, directly inside the tools developers use daily.
+I really appreciated Mr. Pinky for guiding me on the QE learning path and helping me feel prepared for the next stage. I also appreciate my peers who kept sharing helpful materials and encouraged each other to stay on track.
 
-Teams can view trends like cost per daily active user (DAU), helping relate spending to product growth.
-
-Engineers use this insight to optimize usage patterns—turn off idle resources, switch storage classes, or fine-tune autoscaling.
-
-“Engineers are natural optimizers—just give them the right data.”
-
-🚨 2. Automated Cost Alerting
-Spotify set threshold-based alerts within Cost Insights.
-
-When a team’s cloud bill exceeds expected growth, they receive proactive alerts to review usage.
-
-The Cost Engineering team only steps in if a squad’s cost-per-user metric deviates heavily from growth.
-
-“Our goal wasn’t to punish spend—but to ensure we spend smarter.”
-
-📚 3. “Our Cookbook”: Internal FinOps Knowledge Sharing
-Spotify developed a collaborative internal wiki, known as Our Cookbook, where engineers document successful cost optimizations.
-
-This includes real stories about right-sizing, optimizing Kubernetes clusters, and storage class changes.
-
-It fosters a culture of peer learning, turning cost-saving into a friendly engineering challenge.
-
-“Engineers began to share wins like badges of honor—FinOps became fun.”
-
-📊 4. Unit Economics and KPI-Driven Accountability
-Spotify introduced unit economics metrics like:
-
-Cost per search
-
-Cost per daily active user (DAU)
-
-These KPIs tie cloud spend to business impact. Cost Insights enables teams to view whether their cost-per-unit is increasing or decreasing, and react accordingly.
-
-Teams with rising costs but flat usage are prioritized for review. Growing teams with proportionate cost growth are left alone.
-
-“This changed the conversation from ‘you’re over budget’ to ‘what value are you delivering?’”
-
-✅ Impact and Results
-Cloud savings of 15–30% annually
-Spotify reported significant GCP savings by improving visibility and aligning cost with team-level action. Cost Insights played a major role in this transformation .
-
-Savings enabled 25 new squads
-Spotify reinvested cloud savings into building new teams. According to internal reporting, early FinOps gains funded the equivalent of 25 new squads across the company .
-
-Improved engineering ownership
-Engineers gained real-time cost responsibility, resulting in smarter infrastructure decisions and better system design.
-
-Increased reliability alongside cost efficiency
-Optimization efforts didn’t sacrifice performance. In fact, better cost management often led to improved reliability and faster systems, proving that efficiency = resilience.
-
-“Cost visibility improved performance as much as it reduced spend.” – Spotify PM
-
-📌 Summary
-Spotify’s FinOps journey showcases a model where:
-
-Engineering teams are empowered, not micromanaged.
-
-Cost data is integrated directly into developer workflows.
-
-Optimization is collaborative, measurable, and tied to business goals.
-
-By decentralizing accountability and embedding financial insights where engineers work, Spotify turned cost management into a competitive engineering advantage—one that scales.
-
-📝 Sources:
-Spotify Engineering Blog on Cost Insights
-
-RedMonk Report on FinOps at Spotify
-
-Dev.to: Spotify’s GCP Cost Optimization Journey
-
-Reddit AMA on Spotify Cost Engineering
-
-Let me know if you'd like this formatted into a blog-ready Markdown file, added with diagrams or quotes!
-
-
-
-🔧 Sources
-Spotify Engineering Blog – Cost Insights Plugin
-“New Cost Insights plugin: The engineer’s solution to taming cloud costs” (October 22, 2020)
-➤ https://backstage.io/blog/2020/10/22/cost-insights-plugin/
-
-RedMonk – Shifting cost optimisation left
-– Trích: “Early experiences with Cost Insights allowed Spotify to fund the equivalent of 25 teams…”
-➤ https://redmonk.com/jgovernor/2021/04/28/shifting-cost-optimisation-left-spotify-backstage-cost-insights/
-
-Spotify Engineering – Managing Clouds from the Ground Up
-– Giới thiệu Cost Insights và mô hình squad độc lập
-➤ https://engineering.atspotify.com/2020/09/managing-clouds-from-the-ground-up-cost-engineering-at-spotify
-
-Roadie.io Blog – Backstage and Cost Insights
-– Mô tả cách thức và triết lý “shifting cost awareness left” + trích lời Janisa Anandamohan
-➤ https://roadie.io/blog/backstage-and-cost-insights-shifting-cloud-costs-left/
-
-Dev.to – Cloud cost reduction case studies
-– Nêu kết quả tiết kiệm chi phí nhờ Cost Insights và Our Cookbook, kèm ví dụ tiết kiệm hàng triệu đô
-➤ https://dev.to/castai/zoom-spotify-and-others-slashed-their-cloud-costs-by-millions-how-did-they-do-it-38b
-
-
-
-
+More of: Daily planning and setting learning priorities.
+Less of: Letting difficult topics slow me down too long.
+Keep doing: Following the QE learning path and staying engaged in team sessions.
+Stop doing: Leaving optional learning tasks until the last minute.
+Start doing: Creating weekly checklists for self-learning and reviewing every Sunday.
 
