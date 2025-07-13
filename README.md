@@ -69,23 +69,19 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
-This week, I continued attending training sessions with my peers and also joined additional sessions focused on Quality Engineering. I completed the basic ISTQB Foundation course on Udemy, which gave me a better grasp of testing fundamentals. I also had a conversation with Mr. Pinky and learned that I’ll soon join an on-the-job training team. It feels like things are slowly coming together.
 
-One thing that didn’t go well was my time management. Although I made progress in QE, I couldn’t arrange time to start the AWS course as planned. Some technical sessions, like the Kafka exercise, were also challenging, and I struggled to fully keep up with them.
 
-I’m proud that I completed the core lessons in the ISTQB Foundation course. It wasn’t easy to balance it with other sessions, but I stayed committed. Finishing it gave me more clarity and confidence to move forward with my QE learning.
+This week, we were introduced to three Capstone projects and learned about the option to join a Contingency team as an alternative. I continued having 1:1 QE sessions, and I’m very grateful to Mr. Harry and Ms. Hoan Trần for their patient and enthusiastic guidance. These sessions helped me stay focused on technical learning while navigating project decisions.
 
-This week, I learned that good time management is just as important as technical skills. Without a clear plan, it's easy to fall behind or miss learning opportunities — like I did with the AWS course. I realized I need to be more proactive in setting daily and weekly learning goals.
+I had a Meet & Greet with one Contingency team, but I didn’t express myself as clearly as I had hoped. I felt nervous and wasn’t fully able to show my motivation and strengths. Although the result is still pending, I wish I had prepared more thoroughly.
 
-My goals for next week are to start the AWS course, prepare for the meet-and-greet with the on-the-job training team.
+I’m proud that I stayed consistent with my QE learning while going through the project decision process. I stayed focused, continued attending sessions, and didn’t let uncertainty stop me from moving forward.
 
-My current obstacle is maintaining focus while managing multiple learning tracks. It’s sometimes hard to switch between training, self-study, and preparation for future tasks. I need to stay disciplined and avoid distractions to make better use of my time.
+I learned that preparation and communication are equally important. 
 
-I really appreciated Mr. Pinky for guiding me on the QE learning path and helping me feel prepared for the next stage. I also appreciate my peers who kept sharing helpful materials and encouraged each other to stay on track.
+My top goal next week is to mentally and technically prepare for whichever path comes next—whether I join a Contingency team or start the Capstone project. I also want to deliver a confident and clear presentation for the upcoming NAB Builder session.
 
-More of: Daily planning and setting learning priorities.
-Less of: Letting difficult topics slow me down too long.
-Keep doing: Following the QE learning path and staying engaged in team sessions.
-Stop doing: Leaving optional learning tasks until the last minute.
-Start doing: Creating weekly checklists for self-learning and reviewing every Sunday.
+My biggest challenge this week is managing my energy and focus. With QE learning, the uncertainty around whether I’ll join a Contingency team or Capstone project, and the upcoming NAB Builder presentation, it’s easy to feel overwhelmed.
 
+
+I truly appreciate Mr. Harry and Ms. Hoan Trần for their 1:1 QE sessions. They not only taught clearly and patiently, but also encouraged me to stay focused despite the distractions of project decisions. Their support helped me stay motivated and grounded.
