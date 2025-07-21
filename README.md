@@ -71,17 +71,16 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 
 
-This week, we were introduced to three Capstone projects and learned about the option to join a Contingency team as an alternative. I continued having 1:1 QE sessions, and I’m very grateful to Mr. Harry and Ms. Hoan Trần for their patient and enthusiastic guidance. These sessions helped me stay focused on technical learning while navigating project decisions.
+This week, I officially joined the DTC team and participated in Sprint 1 of the Capstone project. It was a good chance to collaborate, understand how the team works, and get hands-on with real tasks. I also started learning AWS, which I had been meaning to do for weeks. It felt good to finally get started.
 
-I had a Meet & Greet with one Contingency team, but I didn’t express myself as clearly as I had hoped. I felt nervous and wasn’t fully able to show my motivation and strengths. Although the result is still pending, I wish I had prepared more thoroughly.
+While I was able to contribute to Sprint 1 with the DTC team, one challenge was the lack of clarity in the two initial problem statements. It made it hard for me to fully grasp the project direction and decide where to focus my efforts. 
 
-I’m proud that I stayed consistent with my QE learning while going through the project decision process. I stayed focused, continued attending sessions, and didn’t let uncertainty stop me from moving forward.
+Starting AWS was my proudest achievement this week. I finally took the first step and made time for something I had been postponing. It reminded me that progress doesn’t have to be perfect—it just has to begin. 
 
-I learned that preparation and communication are equally important. 
+I learned that flexibility and adaptability are essential in a fast-moving environment.
 
-My top goal next week is to mentally and technically prepare for whichever path comes next—whether I join a Contingency team or start the Capstone project. I also want to deliver a confident and clear presentation for the upcoming NAB Builder session.
+Next week, my main goal is to onboard smoothly into the Contingency team and quickly understand their domain and ways of working. 
 
-My biggest challenge this week is managing my energy and focus. With QE learning, the uncertainty around whether I’ll join a Contingency team or Capstone project, and the upcoming NAB Builder presentation, it’s easy to feel overwhelmed.
+My main challenge is context-switching—moving from Capstone to Contingency, while still trying to keep up with self-study. 
 
-
-I truly appreciate Mr. Harry and Ms. Hoan Trần for their 1:1 QE sessions. They not only taught clearly and patiently, but also encouraged me to stay focused despite the distractions of project decisions. Their support helped me stay motivated and grounded.
+I appreciate my DTC teammates for welcoming me into Sprint 1 and helping me get up to speed. I’m also thankful to the mentors in the DTC Capstone project for their time, support, and guidance during discussions.
