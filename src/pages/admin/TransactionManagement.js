@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminApi from '../../api/AdminApi';
 import styles from './TransactionManagement.module.css'; 
-import Chart from '../../components/admin/chart/Chart';
-
 const TransactionManagement = () => {
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
@@ -12,7 +10,10 @@ const TransactionManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [chartData, setChartData] = useState([]);
+  
+  // Modal state for overdue fee confirmation
+  const [showOverdueModal, setShowOverdueModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   const transactionsPerPage = 10;
 
@@ -70,9 +71,7 @@ const TransactionManagement = () => {
     }
   }, [searchTerm]);
 
-  useEffect(() => {
-    fetchChartData();
-  }, [statusFilter, allTransactions]);
+
 
   const fetchAllTransactions = async () => {
     try {
@@ -102,13 +101,27 @@ const TransactionManagement = () => {
           filteredTransactions = result.content.filter(transaction =>
             transaction.book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             transaction.transactionId.toString().includes(searchTerm) ||
-            transaction.user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
+            transaction.username?.toLowerCase().includes(searchTerm.toLowerCase())
           );
         }
         
         setTransactions(filteredTransactions);
         setTotalPages(result.totalPages);
         setTotalElements(result.totalElements);
+        
+        // Debug: Log overdue transactions to check fee data
+        if (statusFilter === 'OVERDUE') {
+          console.log('Overdue transactions:', filteredTransactions);
+          filteredTransactions.forEach(t => {
+            console.log(`Transaction ${t.transactionId}:`, {
+              overdueFee: t.overdueFee,
+              dueDate: t.dueDate,
+              status: t.status,
+              calculatedFee: calculateOverdueFee(t),
+              overdueDays: getOverdueDays(t)
+            });
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
@@ -118,61 +131,39 @@ const TransactionManagement = () => {
     }
   };
 
-  const fetchChartData = async () => {
-    try {
-      const transactionsForChart = allTransactions.filter(t => t.status === statusFilter);
-      const formattedData = transactionsForChart.reduce((acc, transaction) => {
-        let date;
 
-        if (statusFilter === 'PENDING') {
-          date = transaction.borrowDate;
-        } else if (statusFilter === 'BORROWED') {
-          date = transaction.dueDate;
-        } else if (statusFilter === 'RETURNED') {
-          date = transaction.returnDate;
-        } else {
-          date = transaction.borrowDate;
-        }
-
-        if (date) {
-          date = date.split('T')[0];
-          if (!acc[date]) {
-            acc[date] = 0;
-          }
-          acc[date]++;
-        }
-
-        return acc;
-      }, {});
-
-      const sortedChartData = Object.keys(formattedData)
-        .map(date => ({
-          date,
-          count: formattedData[date]
-        }))
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      setChartData(sortedChartData);
-    } catch (error) {
-      console.error('Error fetching chart data:', error);
-    }
-  };
 
   const handleStatusChange = async (transactionId, currentStatus) => {
+    // Handle overdue transactions with confirmation modal
+    if (currentStatus === 'OVERDUE') {
+      const transaction = transactions.find(t => t.transactionId === transactionId);
+      setSelectedTransaction(transaction);
+      setShowOverdueModal(true);
+      return;
+    }
+
     let newStatus = '';
     let apiMethod = null;
 
     if (currentStatus === 'PENDING') {
       newStatus = 'BORROWED';
       apiMethod = AdminApi.updateTransactionToBorrowed;
-    } else if (currentStatus === 'BORROWED' || currentStatus === 'OVERDUE') {
+    } else if (currentStatus === 'BORROWED') {
       newStatus = 'RETURNED';
       apiMethod = AdminApi.updateTransactionToReturned;
     }
 
     if (newStatus && apiMethod) {
       try {
-        await apiMethod(transactionId);
+        const response = await apiMethod(transactionId);
+        
+        // Check if response has error code
+        if (response.data && response.data.code !== 0) {
+          const errorMessage = response.data.message || 'Có lỗi xảy ra khi cập nhật trạng thái';
+          alert(`❌ Lỗi: ${errorMessage}`);
+          return;
+        }
+        
         setTransactions(transactions.map(transaction => 
           transaction.transactionId === transactionId 
             ? { ...transaction, status: newStatus } 
@@ -183,9 +174,66 @@ const TransactionManagement = () => {
         fetchAllTransactions();
       } catch (error) {
         console.error(`Error updating transaction status to ${newStatus}:`, error);
-        alert('Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+        
+        // Handle API error response
+        if (error.response && error.response.data) {
+          const errorData = error.response.data;
+          if (errorData.code && errorData.message) {
+            alert(`❌ Lỗi (${errorData.code}): ${errorData.message}`);
+          } else {
+            alert('❌ Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+          }
+        } else {
+          alert('❌ Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+        }
       }
     }
+  };
+
+  const handleOverdueConfirmation = async () => {
+    if (!selectedTransaction) return;
+
+    try {
+      const response = await AdminApi.updateTransactionToReturned(selectedTransaction.transactionId);
+      
+      // Check if response has error code
+      if (response.data && response.data.code !== 0) {
+        const errorMessage = response.data.message || 'Có lỗi xảy ra khi cập nhật trạng thái';
+        alert(`❌ Lỗi: ${errorMessage}`);
+        return;
+      }
+      
+      setTransactions(transactions.map(transaction => 
+        transaction.transactionId === selectedTransaction.transactionId 
+          ? { ...transaction, status: 'RETURNED' } 
+          : transaction
+      ));
+      // Refresh data
+      fetchTransactions();
+      fetchAllTransactions();
+      // Close modal
+      setShowOverdueModal(false);
+      setSelectedTransaction(null);
+    } catch (error) {
+      console.error('Error updating overdue transaction:', error);
+      
+      // Handle API error response
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        if (errorData.code && errorData.message) {
+          alert(`❌ Lỗi (${errorData.code}): ${errorData.message}`);
+        } else {
+          alert('❌ Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+        }
+      } else {
+        alert('❌ Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+      }
+    }
+  };
+
+  const handleOverdueCancel = () => {
+    setShowOverdueModal(false);
+    setSelectedTransaction(null);
   };
 
   const handleStatusFilterChange = (status) => {
@@ -215,6 +263,227 @@ const TransactionManagement = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('vi-VN');
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('vi-VN');
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount || amount === 0) return '0 VND';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+  // Calculate overdue fee if not provided by API
+  const calculateOverdueFee = (transaction) => {
+    if (transaction.overdueFee && transaction.overdueFee > 0) {
+      return transaction.overdueFee;
+    }
+    
+    if (transaction.status !== 'OVERDUE' || !transaction.dueDate) {
+      return 0;
+    }
+
+    const currentDate = new Date();
+    const dueDate = new Date(transaction.dueDate);
+    
+    if (currentDate <= dueDate) {
+      return 0;
+    }
+
+    const overdueDays = Math.ceil((currentDate - dueDate) / (1000 * 60 * 60 * 24));
+    const feePerDay = 5000; // 5,000 VND per day
+    
+    return overdueDays * feePerDay;
+  };
+
+  // Get display overdue fee for transaction
+  const getOverdueFeeDisplay = (transaction) => {
+    const fee = calculateOverdueFee(transaction);
+    return formatCurrency(fee);
+  };
+
+  // Get overdue days for display
+  const getOverdueDays = (transaction) => {
+    if (transaction.status !== 'OVERDUE' || !transaction.dueDate) {
+      return 0;
+    }
+
+    const currentDate = new Date();
+    const dueDate = new Date(transaction.dueDate);
+    
+    if (currentDate <= dueDate) {
+      return 0;
+    }
+
+    return Math.ceil((currentDate - dueDate) / (1000 * 60 * 60 * 24));
+  };
+
+  // Get column headers based on status filter
+  const getTableHeaders = () => {
+    switch (statusFilter) {
+      case 'PENDING':
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'borrowDate', icon: '📅', label: 'Ngày đặt trước' },
+          { key: 'pickupDeadline', icon: '⏰', label: 'Hạn lấy sách' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+      case 'BORROWED':
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'borrowDateOffline', icon: '📅', label: 'Ngày mượn thực tế' },
+          { key: 'dueDate', icon: '⏰', label: 'Hạn trả' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+      case 'RETURNED':
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'borrowDateOffline', icon: '📅', label: 'Ngày mượn' },
+          { key: 'returnDate', icon: '✅', label: 'Ngày trả' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+      case 'OVERDUE':
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'dueDate', icon: '⏰', label: 'Hạn trả' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+      case 'CANCELLED':
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'borrowDate', icon: '📅', label: 'Ngày đặt trước' },
+          { key: 'pickupDeadline', icon: '⏰', label: 'Hạn lấy sách' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+      default:
+        return [
+          { key: 'id', icon: '🆔', label: 'ID Giao dịch' },
+          { key: 'book', icon: '📖', label: 'Thông tin sách' },
+          { key: 'user', icon: '👤', label: 'Người mượn' },
+          { key: 'borrowDate', icon: '📅', label: 'Ngày mượn' },
+          { key: 'dueDate', icon: '⏰', label: 'Hạn trả' },
+          { key: 'actions', icon: '⚙️', label: 'Thao tác' }
+        ];
+    }
+  };
+
+  // Render table cell content based on column key and status
+  const renderTableCell = (transaction, columnKey) => {
+    switch (columnKey) {
+      case 'id':
+        return (
+          <td className={styles.idCell}>
+            <span className={styles.transactionId}>#{transaction.transactionId}</span>
+          </td>
+        );
+      case 'book':
+        return (
+          <td className={styles.bookInfoCell}>
+            <div className={styles.bookInfo}>
+              <h4 className={styles.bookTitle}>{transaction.book.title}</h4>
+              <p className={styles.bookAuthor}>Tác giả: {transaction.book.author}</p>
+            </div>
+          </td>
+        );
+      case 'user':
+        return (
+          <td className={styles.userCell}>
+            <div className={styles.userInfo}>
+              <div className={styles.userAvatar}>
+                {transaction.username?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <span className={styles.username}>
+                {transaction.username || 'N/A'}
+              </span>
+            </div>
+          </td>
+        );
+      case 'borrowDate':
+        return (
+          <td className={styles.dateCell}>
+            <span className={styles.date}>{formatDateTime(transaction.borrowDate)}</span>
+          </td>
+        );
+      case 'borrowDateOffline':
+        return (
+          <td className={styles.dateCell}>
+            <span className={styles.date}>
+              {transaction.borrowDateOffline ? formatDateTime(transaction.borrowDateOffline) : '-'}
+            </span>
+          </td>
+        );
+      case 'dueDate':
+        return (
+          <td className={styles.dateCell}>
+            <span className={styles.date}>{formatDateTime(transaction.dueDate)}</span>
+          </td>
+        );
+      case 'returnDate':
+        return (
+          <td className={styles.dateCell}>
+            <span className={styles.date}>
+              {transaction.returnDate ? formatDateTime(transaction.returnDate) : '-'}
+            </span>
+          </td>
+        );
+      case 'pickupDeadline':
+        return (
+          <td className={styles.dateCell}>
+            <span className={styles.date}>
+              {transaction.pickupDeadline ? formatDateTime(transaction.pickupDeadline) : '-'}
+            </span>
+          </td>
+        );
+      case 'overdueFee':
+        return (
+          <td className={styles.feeCell}>
+            <span className={`${styles.fee} ${transaction.overdueFee > 0 ? styles.hasOverdueFee : ''}`}>
+              {getOverdueFeeDisplay(transaction)}
+            </span>
+          </td>
+        );
+      case 'status':
+        return (
+          <td className={styles.statusCell}>
+            <span className={`${styles.statusBadge} ${styles[statusConfig[transaction.status].color]}`}>
+              <span className={styles.statusIcon}>
+                {statusConfig[transaction.status].icon}
+              </span>
+              {statusConfig[transaction.status].label}
+            </span>
+          </td>
+        );
+      case 'actions':
+        return (
+          <td className={styles.actionsCell}>
+            {statusConfig[transaction.status].action && (
+              <button
+                className={`${styles.actionButton} ${styles[statusConfig[transaction.status].color]}`}
+                onClick={() => handleStatusChange(transaction.transactionId, transaction.status)}
+              >
+                {statusConfig[transaction.status].action}
+              </button>
+            )}
+          </td>
+        );
+      default:
+        return <td>-</td>;
+    }
   };
 
   const renderPagination = () => {
@@ -305,44 +574,7 @@ const TransactionManagement = () => {
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className={styles.statsContainer}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>📊</div>
-          <div className={styles.statContent}>
-            <h3 className={styles.statNumber}>{stats.total}</h3>
-            <p className={styles.statLabel}>Tổng giao dịch</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>⏳</div>
-          <div className={styles.statContent}>
-            <h3 className={styles.statNumber}>{stats.pending}</h3>
-            <p className={styles.statLabel}>Chờ mượn</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>📖</div>
-          <div className={styles.statContent}>
-            <h3 className={styles.statNumber}>{stats.borrowed}</h3>
-            <p className={styles.statLabel}>Đang mượn</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>✅</div>
-          <div className={styles.statContent}>
-            <h3 className={styles.statNumber}>{stats.returned}</h3>
-            <p className={styles.statLabel}>Đã trả</p>
-          </div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>⚠️</div>
-          <div className={styles.statContent}>
-            <h3 className={styles.statNumber}>{stats.overdue}</h3>
-            <p className={styles.statLabel}>Quá hạn</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Status Filter Tabs */}
       <div className={styles.statusTabs}>
@@ -403,82 +635,18 @@ const TransactionManagement = () => {
           <table className={styles.transactionTable}>
             <thead>
               <tr>
-                <th>
-                  <span className={styles.headerIcon}>🆔</span>
-                  ID Giao dịch
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>📖</span>
-                  Thông tin sách
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>👤</span>
-                  Người mượn
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>📅</span>
-                  Ngày mượn
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>⏰</span>
-                  Hạn trả
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>📋</span>
-                  Trạng thái
-                </th>
-                <th>
-                  <span className={styles.headerIcon}>⚙️</span>
-                  Thao tác
-                </th>
+                {getTableHeaders().map((header, index) => (
+                  <th key={index}>
+                    <span className={styles.headerIcon}>{header.icon}</span>
+                    {header.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {transactions.map(transaction => (
                 <tr key={transaction.transactionId} className={styles.transactionRow}>
-                  <td className={styles.idCell}>
-                    <span className={styles.transactionId}>#{transaction.transactionId}</span>
-                  </td>
-                  <td className={styles.bookInfoCell}>
-                    <div className={styles.bookInfo}>
-                      <h4 className={styles.bookTitle}>{transaction.book.title}</h4>
-                      <p className={styles.bookAuthor}>Tác giả: {transaction.book.author}</p>
-                    </div>
-                  </td>
-                  <td className={styles.userCell}>
-                    <div className={styles.userInfo}>
-                      <div className={styles.userAvatar}>
-                        {transaction.user?.username?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                      <span className={styles.username}>
-                        {transaction.user?.username || 'N/A'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className={styles.dateCell}>
-                    <span className={styles.date}>{formatDate(transaction.borrowDate)}</span>
-                  </td>
-                  <td className={styles.dateCell}>
-                    <span className={styles.date}>{formatDate(transaction.dueDate)}</span>
-                  </td>
-                  <td className={styles.statusCell}>
-                    <span className={`${styles.statusBadge} ${styles[statusConfig[transaction.status].color]}`}>
-                      <span className={styles.statusIcon}>
-                        {statusConfig[transaction.status].icon}
-                      </span>
-                      {statusConfig[transaction.status].label}
-                    </span>
-                  </td>
-                  <td className={styles.actionsCell}>
-                    {statusConfig[transaction.status].action && (
-                      <button
-                        className={`${styles.actionButton} ${styles[statusConfig[transaction.status].color]}`}
-                        onClick={() => handleStatusChange(transaction.transactionId, transaction.status)}
-                      >
-                        {statusConfig[transaction.status].action}
-                      </button>
-                    )}
-                  </td>
+                  {getTableHeaders().map((header, index) => renderTableCell(transaction, header.key))}
                 </tr>
               ))}
             </tbody>
@@ -509,24 +677,76 @@ const TransactionManagement = () => {
         </div>
       )}
 
-      {/* Chart Section */}
-      <div className={styles.chartSection}>
-        <div className={styles.chartHeader}>
-          <h3 className={styles.chartTitle}>
-            <span className={styles.chartIcon}>📈</span>
-            Biểu đồ giao dịch - {statusConfig[statusFilter].label}
-          </h3>
-          <p className={styles.chartSubtitle}>
-            Thống kê số lượng giao dịch theo thời gian
-          </p>
+      {/* Overdue Fee Confirmation Modal */}
+      {showOverdueModal && selectedTransaction && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <span className={styles.modalIcon}>⚠️</span>
+                Xác nhận trả sách quá hạn
+              </h3>
+              <button 
+                className={styles.modalCloseButton}
+                onClick={handleOverdueCancel}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.transactionInfo}>
+                <h4 className={styles.bookTitleModal}>
+                  📖 {selectedTransaction.book.title}
+                </h4>
+                <p className={styles.bookAuthorModal}>
+                  Tác giả: {selectedTransaction.book.author}
+                </p>
+                <p className={styles.borrowerModal}>
+                  👤 Người mượn: {selectedTransaction.username}
+                </p>
+                <p className={styles.dueDateModal}>
+                  ⏰ Hạn trả: {formatDateTime(selectedTransaction.dueDate)}
+                </p>
+              </div>
+
+              <div className={styles.feeInfo}>
+                <div className={styles.feeLabel}>Phí phạt quá hạn:</div>
+                <div className={styles.feeAmount}>
+                  {getOverdueFeeDisplay(selectedTransaction)}
+                </div>
+                <div className={styles.overdueDays}>
+                  Quá hạn: {getOverdueDays(selectedTransaction)} ngày
+                </div>
+              </div>
+
+              <div className={styles.confirmationText}>
+                <p>⚠️ Người mượn đã trả tiền phí phạt và trả sách?</p>
+                <p className={styles.warningText}>
+                  Hành động này sẽ cập nhật trạng thái giao dịch thành "Đã trả sách" 
+                  và không thể hoàn tác.
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.cancelButton}
+                onClick={handleOverdueCancel}
+              >
+                Hủy
+              </button>
+              <button 
+                className={styles.confirmButton}
+                onClick={handleOverdueConfirmation}
+              >
+                Xác nhận đã trả tiền & sách
+              </button>
+            </div>
+          </div>
         </div>
-        <Chart 
-          chartTitle={`Giao dịch ${statusConfig[statusFilter].label}`}
-          label="Số lượng giao dịch" 
-          chartColor="rgba(75,192,192,1)" 
-          data={chartData} 
-        />
-      </div>
+      )}
+
     </div>
   );
 };

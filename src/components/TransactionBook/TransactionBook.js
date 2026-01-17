@@ -29,14 +29,16 @@ const TransactionBook = ({ transaction }) => {
   // Get status styling
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
+      case 'pending':
+        return styles.statusPending;
       case 'borrowed':
         return styles.statusBorrowed;
       case 'returned':
         return styles.statusReturned;
       case 'overdue':
         return styles.statusOverdue;
-      case 'pending':
-        return styles.statusPending;
+      case 'cancelled':
+        return styles.statusCancelled;
       default:
         return styles.statusDefault;
     }
@@ -66,10 +68,11 @@ const TransactionBook = ({ transaction }) => {
           <div className={styles.transactionHeader}>
             <h3 className={styles.transactionTitle}>Thông tin giao dịch</h3>
             <span className={`${styles.status} ${getStatusClass(status)}`}>
-              {status === 'BORROWED' ? 'Đang mượn' : 
+              {status === 'PENDING' ? 'Chờ nhận sách' : 
+               status === 'BORROWED' ? 'Đang mượn' : 
                status === 'RETURNED' ? 'Đã trả' : 
                status === 'OVERDUE' ? 'Quá hạn' : 
-               status === 'PENDING' ? 'Chờ xử lý' : status}
+               status === 'CANCELLED' ? 'Đã hủy' : status}
             </span>
           </div>
 
@@ -79,40 +82,120 @@ const TransactionBook = ({ transaction }) => {
               <span className={styles.value}>{transactionId}</span>
             </div>
 
-            <div className={styles.detailRow}>
-              <span className={styles.label}>Ngày mượn:</span>
-              <span className={styles.value}>{formatDate(borrowDate)}</span>
-            </div>
-
-            <div className={styles.detailRow}>
-              <span className={styles.label}>Ngày hạn trả:</span>
-              <span className={`${styles.value} ${isOverdue ? styles.overdue : ''}`}>
-                {formatDate(dueDate)}
-                {isOverdue && <span className={styles.overdueLabel}>Quá hạn</span>}
-              </span>
-            </div>
-
-            {returnDate && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>Ngày trả:</span>
-                <span className={styles.value}>{formatDate(returnDate)}</span>
-              </div>
+            {/* Display fields based on transaction status */}
+            {status === 'PENDING' && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày đặt trước:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                {pickupDeadline && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Hạn nhận sách:</span>
+                    <span className={styles.value}>{formatDate(pickupDeadline)}</span>
+                  </div>
+                )}
+                {dueDate && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Hạn trả dự kiến:</span>
+                    <span className={styles.value}>{formatDate(dueDate)}</span>
+                  </div>
+                )}
+              </>
             )}
 
-            {pickupDeadline && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>Hạn nhận sách:</span>
-                <span className={styles.value}>{formatDate(pickupDeadline)}</span>
-              </div>
+            {status === 'BORROWED' && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày mượn:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Hạn trả:</span>
+                  <span className={`${styles.value} ${isOverdue ? styles.overdue : ''}`}>
+                    {formatDate(dueDate)}
+                    {isOverdue && <span className={styles.overdueLabel}>Quá hạn</span>}
+                  </span>
+                </div>
+              </>
             )}
 
-            {overdueFee !== null && overdueFee !== undefined && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>Phí quá hạn:</span>
-                <span className={`${styles.value} ${overdueFee > 0 ? styles.feeAmount : ''}`}>
-                  {formatCurrency(overdueFee)}
-                </span>
-              </div>
+            {status === 'RETURNED' && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày mượn:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Hạn trả:</span>
+                  <span className={styles.value}>{formatDate(dueDate)}</span>
+                </div>
+                {returnDate && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Ngày trả thực tế:</span>
+                    <span className={styles.value}>{formatDate(returnDate)}</span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {status === 'OVERDUE' && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày mượn:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Hạn trả:</span>
+                  <span className={`${styles.value} ${styles.overdue}`}>
+                    {formatDate(dueDate)}
+                    <span className={styles.overdueLabel}>Đã quá hạn</span>
+                  </span>
+                </div>
+                {overdueFee !== null && overdueFee !== undefined && overdueFee > 0 && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Phí phạt quá hạn:</span>
+                    <span className={`${styles.value} ${styles.feeAmount}`}>
+                      {formatCurrency(overdueFee)}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {status === 'CANCELLED' && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày đặt trước:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                {pickupDeadline && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Hạn nhận sách:</span>
+                    <span className={styles.value}>{formatDate(pickupDeadline)}</span>
+                  </div>
+                )}
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Lý do hủy:</span>
+                  <span className={styles.value}>Quá hạn nhận sách</span>
+                </div>
+              </>
+            )}
+
+            {/* Fallback for unknown status */}
+            {!['PENDING', 'BORROWED', 'RETURNED', 'OVERDUE', 'CANCELLED'].includes(status) && (
+              <>
+                <div className={styles.detailRow}>
+                  <span className={styles.label}>Ngày mượn:</span>
+                  <span className={styles.value}>{formatDate(borrowDate)}</span>
+                </div>
+                {dueDate && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.label}>Hạn trả:</span>
+                    <span className={styles.value}>{formatDate(dueDate)}</span>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

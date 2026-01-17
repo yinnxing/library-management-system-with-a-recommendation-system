@@ -81,7 +81,7 @@ const UserProfile = () => {
   const handleEditToggle = () => {
     if (isEditing) {
       // Reset form if canceling edit
-      const fetchUserProfile = async () => {
+      const resetForm = async () => {
         try {
           const response = await UserApi.getMyInfo();
           const userData = response.data.result;
@@ -95,10 +95,12 @@ const UserProfile = () => {
           });
         } catch (err) {
           console.error('Error refreshing user profile:', err);
+          message.error('Không thể làm mới dữ liệu hồ sơ');
         }
       };
-      fetchUserProfile();
+      resetForm();
     }
+    
     setIsEditing(prev => !prev);
   };
 
@@ -118,7 +120,7 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       // Use the existing updateUserProfile method with userId
-      await UserApi.updateUserProfile(user.userId, {
+      await UserApi.updateUserProfile({
         username: profileData.username,
         dob: profileData.dob,
         gender: profileData.gender
@@ -142,7 +144,7 @@ const UserProfile = () => {
     }
     
     try {
-      await UserApi.changePassword(user.userId, passwordData.currentPassword, passwordData.newPassword);
+      await UserApi.changePassword(passwordData.currentPassword, passwordData.newPassword, passwordData.confirmPassword);
       message.success('Password changed successfully');
       setIsChangingPassword(false);
       setPasswordData({
@@ -183,6 +185,12 @@ const UserProfile = () => {
       default:
         return 'Chưa cập nhật';
     }
+  };
+
+  const handleEditButtonClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleEditToggle();
   };
 
   if (loading) {
@@ -317,7 +325,7 @@ const UserProfile = () => {
                   </button>
                 </>
               ) : (
-                <button type="button" onClick={handleEditToggle} className={styles.editButton}>
+                <button type="button" onClick={handleEditButtonClick} className={styles.editButton}>
                   <span className={styles.buttonIcon}>✏️</span>
                   Chỉnh Sửa Hồ Sơ
                 </button>

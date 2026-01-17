@@ -128,7 +128,13 @@ const AdminApi = {
         return axiosInstance.get('/users');  
     },
 
-    
+    deactivateUser(userId) {
+        return axiosInstance.put(`/users/${userId}/deactivate`);
+    },
+
+    activateUser(userId) {
+        return axiosInstance.put(`/users/${userId}/activate`);
+    },
 };
 
 export default AdminApi;

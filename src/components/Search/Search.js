@@ -78,7 +78,7 @@ const Search = () => {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
-                placeholder="Tìm kiếm sách theo tên, tác giả, thể loại..."
+                placeholder="Tìm kiếm sách theo tên,..."
                 disabled={loading}
             />
             {loading && (

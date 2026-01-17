@@ -91,12 +91,7 @@ const AdminDashboard = () => {
               {navigationItems.find(item => isActive(item.path))?.label || 'Bảng điều khiển'}
             </span>
           </div>
-          <div className={styles.headerActions}>
-            <button className={styles.refreshButton}>
-              <span className={styles.refreshIcon}>🔄</span>
-              Làm mới
-            </button>
-          </div>
+
         </div>
 
         <div className={styles.contentBody}>

@@ -14,6 +14,7 @@ import UserProfile from '../pages/UserProfile/UserProfile.js';
 import OAuthCallback from '../pages/OAuthCallback/OAuthCallback.js';
 import AdvancedSearchPage from '../pages/AdvancedSearchPage/AdvancedSearchPage.tsx';
 import BookSuggestions from '../pages/BookSuggestions/BookSuggestions.js';
+import Policy from '../pages/Policy/Policy.js';
 
 const publicRoutes = [
   {path: '/', component: HomePage, layout: DefaultLayout},
@@ -27,6 +28,7 @@ const publicRoutes = [
   {path: '/user-profile', component: UserProfile, layout: DefaultLayout},
   {path: '/oauth2/callback', component: OAuthCallback, layout: DefaultLayout},
   {path: '/advanced-search', component: AdvancedSearchPage, layout: DefaultLayout},
+  {path: '/policy', component: Policy, layout: DefaultLayout},
 ];
 
 

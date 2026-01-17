@@ -6,6 +6,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [processingUserId, setProcessingUserId] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -24,6 +25,52 @@ const UserManagement = () => {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeactivateUser = async (userId, username) => {
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn vô hiệu hóa tài khoản của người dùng "${username}"?`);
+    
+    if (!confirmed) return;
+    
+    setProcessingUserId(userId);
+    try {
+      const response = await AdminApi.deactivateUser(userId);
+      if (response.data.code === 0) {
+        alert('Tài khoản đã được vô hiệu hóa thành công!');
+        // Refresh the user list
+        await fetchUsers();
+      } else {
+        alert('Có lỗi xảy ra khi vô hiệu hóa tài khoản: ' + (response.data.message || 'Lỗi không xác định'));
+      }
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      alert('Có lỗi xảy ra khi vô hiệu hóa tài khoản: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setProcessingUserId(null);
+    }
+  };
+
+  const handleActivateUser = async (userId, username) => {
+    const confirmed = window.confirm(`Bạn có chắc chắn muốn kích hoạt lại tài khoản của người dùng "${username}"?`);
+    
+    if (!confirmed) return;
+    
+    setProcessingUserId(userId);
+    try {
+      const response = await AdminApi.activateUser(userId);
+      if (response.data.code === 0) {
+        alert('Tài khoản đã được kích hoạt thành công!');
+        // Refresh the user list
+        await fetchUsers();
+      } else {
+        alert('Có lỗi xảy ra khi kích hoạt tài khoản: ' + (response.data.message || 'Lỗi không xác định'));
+      }
+    } catch (error) {
+      console.error('Error activating user:', error);
+      alert('Có lỗi xảy ra khi kích hoạt tài khoản: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setProcessingUserId(null);
     }
   };
 
@@ -122,6 +169,10 @@ const UserManagement = () => {
                   <span className={styles.headerIcon}>📅</span>
                   Trạng thái
                 </th>
+                <th>
+                  <span className={styles.headerIcon}>⚙️</span>
+                  Hành động
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -142,10 +193,53 @@ const UserManagement = () => {
                     <span className={styles.email}>{user.email}</span>
                   </td>
                   <td className={styles.statusCell}>
-                    <span className={styles.statusBadge}>
-                      <span className={styles.statusIcon}>✅</span>
-                      Hoạt động
+                    <span className={`${styles.statusBadge} ${user.isActive ? styles.statusActive : styles.statusInactive}`}>
+                      <span className={styles.statusIcon}>
+                        {user.isActive ? '✅' : '❌'}
+                      </span>
+                      {user.isActive ? 'Hoạt động' : 'Đã vô hiệu hóa'}
                     </span>
+                  </td>
+                  <td className={styles.actionCell}>
+                    {user.isActive ? (
+                      <button
+                        className={styles.deactivateButton}
+                        onClick={() => handleDeactivateUser(user.userId, user.username)}
+                        disabled={processingUserId === user.userId}
+                        title="Vô hiệu hóa tài khoản"
+                      >
+                        {processingUserId === user.userId ? (
+                          <>
+                            <span className={styles.loadingSpinner}></span>
+                            Đang xử lý...
+                          </>
+                        ) : (
+                          <>
+                            <span className={styles.deactivateIcon}>🚫</span>
+                            Vô hiệu hóa
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.activateButton}
+                        onClick={() => handleActivateUser(user.userId, user.username)}
+                        disabled={processingUserId === user.userId}
+                        title="Kích hoạt tài khoản"
+                      >
+                        {processingUserId === user.userId ? (
+                          <>
+                            <span className={styles.loadingSpinner}></span>
+                            Đang xử lý...
+                          </>
+                        ) : (
+                          <>
+                            <span className={styles.activateIcon}>✅</span>
+                            Kích hoạt
+                          </>
+                        )}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

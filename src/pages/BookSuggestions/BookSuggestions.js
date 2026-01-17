@@ -79,7 +79,17 @@ const BookSuggestions = () => {
       }
 
       const response = await UserApi.getRecommendedBooks(user.userId);
-      const recommendedBooksData = response.data.recommendations;
+      
+      // Check if response has the expected structure
+      if (response.data.code !== 0) {
+        console.error("API trả về mã lỗi:", response.data.code, response.data.message);
+        setError(response.data.message || "Không thể tải danh sách gợi ý.");
+        setRecommendedBooks(defaultRecommendedBooks);
+        return;
+      }
+
+      const result = response.data.result;
+      const recommendedBooksData = result.recommendations;
 
       if (!recommendedBooksData || !Array.isArray(recommendedBooksData)) {
         console.error("Dữ liệu recommendedBooks không đúng định dạng");
@@ -87,29 +97,51 @@ const BookSuggestions = () => {
         return;
       }
 
-      const recommendedBooks = recommendedBooksData.map((book, index) => ({
-        bookId: book.isbn || index,
+      // The API now returns complete book data, so we can use it directly
+      const recommendedBooks = recommendedBooksData.map((book) => ({
+        bookId: book.bookId,
         title: book.title,
         author: book.author,
-        coverImageUrl: book.cover,
-        availableQuantity: 5,
+        publisher: book.publisher,
+        publicationYear: book.publicationYear,
+        isbn: book.isbn,
+        genre: book.genre || "Recommended",
+        descriptions: book.descriptions,
+        coverImageUrl: book.coverImageUrl,
+        quantity: book.quantity,
+        availableQuantity: book.availableQuantity,
+        createdAt: book.createdAt,
+        previewLink: book.previewLink,
+        isAvailable: book.isAvailable
       }));
 
       setRecommendedBooks(recommendedBooks);
+      
+      // Log the input book for reference
+      console.log("Sách được sử dụng để gợi ý:", result.inputBook);
+      
     } catch (error) {
       console.error("Lỗi khi lấy danh sách sách đề xuất:", error);
-      setError("Không thể tải danh sách gợi ý. Hiển thị sách mặc định.");
+      
+      // Handle error response with code and message format
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        if (errorData.code && errorData.message) {
+          setError(errorData.message);
+        } else {
+          setError("Không thể tải danh sách gợi ý. Hiển thị sách mặc định.");
+        }
+      } else {
+        setError("Lỗi kết nối đến máy chủ. Hiển thị sách mặc định.");
+      }
+      
       setRecommendedBooks(defaultRecommendedBooks);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRefreshRecommendations = () => {
-    if (user?.userId) {
-      fetchRecommendedBooks();
-    }
-  };
+
 
   if (!user) {
     return (
@@ -133,48 +165,13 @@ const BookSuggestions = () => {
             Gợi Ý Sách Dành Cho Bạn
           </h1>
           <p className={styles.pageSubtitle}>
-            Khám phá những cuốn sách được chọn lọc đặc biệt dành riêng cho sở thích của bạn
+            Khám phá những cuốn sách gợi ý dựa trên lịch sử đặt trước và danh sách yêu thích của bạn
           </p>
-        </div>
-        
-        <div className={styles.actionButtons}>
-          <button 
-            onClick={handleRefreshRecommendations}
-            className={styles.refreshButton}
-            disabled={loading}
-          >
-            <span className={styles.buttonIcon}>🔄</span>
-            {loading ? 'Đang tải...' : 'Làm mới gợi ý'}
-          </button>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className={styles.statsSection}>
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>📚</div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{recommendedBooks.length}</div>
-            <div className={styles.statLabel}>Sách được gợi ý</div>
-          </div>
-        </div>
         
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>⭐</div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>Cá nhân hóa</div>
-            <div className={styles.statLabel}>Dựa trên sở thích</div>
-          </div>
-        </div>
-        
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>🎯</div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>AI</div>
-            <div className={styles.statLabel}>Thuật toán thông minh</div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Error Message */}
       {error && (
@@ -196,24 +193,20 @@ const BookSuggestions = () => {
           <div className={styles.instructionsSection}>
             <h3 className={styles.instructionsTitle}>
               <span className={styles.instructionsIcon}>💡</span>
-              Cách sử dụng hệ thống gợi ý
+              Cách hoạt động của hệ thống gợi ý
             </h3>
             <div className={styles.instructionsList}>
               <div className={styles.instructionItem}>
                 <span className={styles.instructionIcon}>1️⃣</span>
-                <span>Xem danh sách sách được gợi ý dựa trên sở thích của bạn</span>
+                <span>Hệ thống gợi ý sách dựa trên các cuốn sách bạn đã đặt trước</span>
               </div>
               <div className={styles.instructionItem}>
                 <span className={styles.instructionIcon}>2️⃣</span>
-                <span>Đánh giá sách bằng cách chọn số sao (1-5 sao)</span>
+                <span>Nếu chưa có lịch sử đặt trước, sẽ gợi ý dựa trên danh sách yêu thích</span>
               </div>
               <div className={styles.instructionItem}>
                 <span className={styles.instructionIcon}>3️⃣</span>
-                <span>Thêm sách yêu thích vào danh sách của bạn</span>
-              </div>
-              <div className={styles.instructionItem}>
-                <span className={styles.instructionIcon}>4️⃣</span>
-                <span>Hệ thống sẽ học từ phản hồi để cải thiện gợi ý</span>
+                <span>Thêm sách vào danh sách yêu thích để nhận được gợi ý tương tự</span>
               </div>
             </div>
           </div>
@@ -226,7 +219,7 @@ const BookSuggestions = () => {
                 Danh sách gợi ý ({recommendedBooks.length} cuốn sách)
               </h2>
               <p className={styles.sectionDescription}>
-                Những cuốn sách này được chọn lọc dựa trên lịch sử đọc và sở thích của bạn
+                Những cuốn sách này được gợi ý dựa trên lịch sử đặt trước và danh sách yêu thích của bạn
               </p>
             </div>
             
@@ -246,17 +239,14 @@ const BookSuggestions = () => {
             </h3>
             <div className={styles.tipsList}>
               <div className={styles.tipItem}>
-                <span className={styles.tipIcon}>✨</span>
-                <span>Đánh giá nhiều sách để hệ thống hiểu rõ sở thích của bạn</span>
+                <span className={styles.tipIcon}>📋</span>
+                <span>Đặt trước nhiều sách để hệ thống có thể gợi ý sách tương tự</span>
               </div>
               <div className={styles.tipItem}>
-                <span className={styles.tipIcon}>📚</span>
-                <span>Thêm sách vào danh sách yêu thích để cải thiện thuật toán</span>
+                <span className={styles.tipIcon}>❤️</span>
+                <span>Thêm sách vào danh sách yêu thích để nhận gợi ý phù hợp</span>
               </div>
-              <div className={styles.tipItem}>
-                <span className={styles.tipIcon}>🔄</span>
-                <span>Làm mới gợi ý thường xuyên để khám phá sách mới</span>
-              </div>
+
             </div>
           </div>
         </>

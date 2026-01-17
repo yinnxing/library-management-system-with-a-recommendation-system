@@ -180,14 +180,15 @@ const UserApi = {
         return axiosInstance.get(`/users/${userId}/profile`);
     },
 
-    updateUserProfile(userId, profileData) {
-        return axiosInstance.put(`/users/${userId}/profile`, profileData);
+    updateUserProfile(profileData) {
+        return axiosInstance.put(`/users/profile`, profileData);
     },
 
-    changePassword(userId, currentPassword, newPassword) {
-        return axiosInstance.post(`/users/${userId}/change-password`, {
+   changePassword(currentPassword, newPassword, confirmPassword) {
+        return axiosInstance.put(`/users/change-password`, {
             currentPassword,
-            newPassword
+            newPassword,
+            confirmPassword
         });
     },
 
